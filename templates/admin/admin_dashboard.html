@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GlobeTrotter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        
+        .admin-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .metric-card-users {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .metric-card-trips {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .metric-card-revenue {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .admin-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .admin-badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .admin-badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .admin-badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Include Admin Navigation -->
+{% include 'partials/admin_navbar.html' %}
+
+<!-- Main Dashboard Content -->
+<div class="container mx-auto px-6 py-8" id="overview">
+    
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+        <p class="text-gray-600">Monitor and manage your GlobeTrotter platform</p>
+    </div>
+    
+    <!-- Key Metrics Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Users -->
+        <div class="metric-card-users admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-white/80 text-sm uppercase tracking-wide font-semibold">Total Users</p>
+                    <p class="text-3xl font-bold mt-2">{{ analytics.overview.total_users }}</p>
+                    <div class="flex items-center mt-2">
+                        <i class="fas fa-arrow-up text-sm mr-1"></i>
+                        <span class="text-sm">+{{ analytics.overview.recent_users }} this week</span>
+                    </div>
+                </div>
+                <div class="bg-white/20 p-3 rounded-lg">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Verified -->
+        <div class="metric-card-trips admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-white/80 text-sm uppercase tracking-wide font-semibold">Verified Users</p>
+                    <p class="text-3xl font-bold mt-2">{{ analytics.overview.verified_users if analytics.overview.verified_users is defined else 0 }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-sm">
+                            {{ "%.1f"|format((analytics.overview.verified_users / analytics.overview.total_users * 100) if analytics.overview.total_users > 0 else 0) }}% verified
+                        </span>
+                    </div>
+                </div>
+                <div class="bg-white/20 p-3 rounded-lg">
+                    <i class="fas fa-shield-check text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Trips -->
+        <div class="metric-card-revenue admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-white/80 text-sm uppercase tracking-wide font-semibold">Total Trips</p>
+                    <p class="text-3xl font-bold mt-2">{{ analytics.overview.total_trips }}</p>
+                    <div class="flex items-center mt-2">
+                        <i class="fas fa-arrow-up text-sm mr-1"></i>
+                        <span class="text-sm">+{{ analytics.overview.recent_trips }} this week</span>
+                    </div>
+                </div>
+                <div class="bg-white/20 p-3 rounded-lg">
+                    <i class="fas fa-suitcase text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="metric-card admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-white/80 text-sm uppercase tracking-wide font-semibold">Platform Budget</p>
+                    <p class="text-3xl font-bold mt-2">₹{{ (analytics.overview.total_expenses|default(0))|int }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-sm">Total managed</span>
+                    </div>
+                </div>
+                <div class="bg-white/20 p-3 rounded-lg">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+                </div>
+                <i class="fas fa-user-check text-4xl text-green-200"></i>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500 to-purple-700 admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm uppercase tracking-wide">Total Trips</p>
+                    <p class="text-3xl font-bold">{{ analytics.overview.total_trips }}</p>
+                    <p class="text-purple-200 text-sm mt-1">
+                        <i class="fas fa-arrow-up"></i> +{{ analytics.overview.recent_trips }} this month
+                    </p>
+                </div>
+                <i class="fas fa-plane text-4xl text-purple-200"></i>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-500 to-red-600 admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-orange-100 text-sm uppercase tracking-wide">Total Expenses</p>
+                    <p class="text-3xl font-bold">₹{{ (analytics.overview.total_expenses|default(0))|int }}</p>
+                    <p class="text-orange-200 text-sm mt-1">
+                        <i class="fas fa-receipt"></i> {{ analytics.overview.total_expense_count|default(0) }} transactions
+                    </p>
+                </div>
+                <i class="fas fa-rupee-sign text-4xl text-orange-200"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Analytics Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Average Expense per Trip -->
+        <div class="bg-gradient-to-br from-teal-500 to-cyan-600 admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-teal-100 text-sm uppercase tracking-wide">Avg per Trip</p>
+                    <p class="text-3xl font-bold">₹{{ (analytics.overview.avg_expense_per_trip|default(0))|int }}</p>
+                    <p class="text-teal-200 text-sm mt-1">
+                        <i class="fas fa-calculator"></i> Per trip average
+                    </p>
+                </div>
+                <i class="fas fa-chart-bar text-4xl text-teal-200"></i>
+            </div>
+        </div>
+
+        <!-- Top Expense Category -->
+        <div class="bg-gradient-to-br from-pink-500 to-rose-600 admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-pink-100 text-sm uppercase tracking-wide">Top Category</p>
+                    <p class="text-3xl font-bold">
+                        {% if analytics.expense_categories %}
+                            {{ analytics.expense_categories[0].category.title() }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+                    <p class="text-pink-200 text-sm mt-1">
+                        <i class="fas fa-tag"></i>
+                        {% if analytics.expense_categories %}
+                            ₹{{ (analytics.expense_categories[0].total|default(0))|int }}
+                        {% else %}
+                            No expenses
+                        {% endif %}
+                    </p>
+                </div>
+                <i class="fas fa-crown text-4xl text-pink-200"></i>
+            </div>
+        </div>
+
+        <!-- Monthly Expense Growth -->
+        <div class="bg-gradient-to-br from-amber-500 to-orange-600 admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-100 text-sm uppercase tracking-wide">This Month</p>
+                    <p class="text-3xl font-bold">
+                        {% if analytics.expense_trends and analytics.expense_trends|length > 0 %}
+                            ₹{{ (analytics.expense_trends[-1].amount|default(0))|int }}
+                        {% else %}
+                            ₹0
+                        {% endif %}
+                    </p>
+                    <p class="text-amber-200 text-sm mt-1">
+                        <i class="fas fa-calendar"></i> Current month expenses
+                    </p>
+                </div>
+                <i class="fas fa-trending-up text-4xl text-amber-200"></i>
+            </div>
+        </div>
+
+        <!-- Expense Savings Rate -->
+        <div class="bg-gradient-to-br from-emerald-500 to-green-600 admin-card p-6 rounded-xl shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-emerald-100 text-sm uppercase tracking-wide">Budget Usage</p>
+                    <p class="text-3xl font-bold">
+                        {% set total_budgets = analytics.budget_analytics | map(attribute='total_budget') | sum %}
+                        {% if total_budgets > 0 %}
+                            {{ "%.1f"|format((analytics.overview.total_expenses / total_budgets * 100)|default(0)) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                    <p class="text-emerald-200 text-sm mt-1">
+                        <i class="fas fa-percentage"></i> Of planned budget
+                    </p>
+                </div>
+                <i class="fas fa-piggy-bank text-4xl text-emerald-200"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8" id="analytics">
+        
+        <!-- User Growth Chart -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line text-blue-500 mr-3"></i>User Growth Trend
+            </h3>
+            <div class="chart-container">
+                <canvas id="userGrowthChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Trip Status Distribution -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-pie text-purple-500 mr-3"></i>Trip Status Distribution
+            </h3>
+            <div class="chart-container">
+                <canvas id="tripStatusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Budget Analytics -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-green-500 mr-3"></i>Budget Analytics
+            </h3>
+            <div class="chart-container">
+                <canvas id="budgetChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Expense Categories -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-donut text-orange-500 mr-3"></i>Expense Categories
+            </h3>
+            <div class="chart-container">
+                <canvas id="expenseCategoriesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Analytics Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        
+        <!-- Monthly Expense Trends -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line text-indigo-500 mr-3"></i>Monthly Expense Trends
+            </h3>
+            <div class="chart-container">
+                <canvas id="expenseTrendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Budget vs Actual Spending -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-red-500 mr-3"></i>Budget vs Actual Spending
+            </h3>
+            <div class="chart-container">
+                <canvas id="budgetVsActualChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        
+        <!-- Popular Destinations -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-map-marker-alt text-red-500 mr-3"></i>Popular Destinations
+            </h3>
+            <div class="space-y-4">
+                {% for destination in analytics.popular_destinations %}
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-city text-gray-500 mr-3"></i>
+                        <div>
+                            <span class="font-medium">{{ destination.destination }}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {{ destination.count }} trips
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not analytics.popular_destinations %}
+                <p class="text-gray-500 text-center py-8">No destination data available</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-clock text-blue-500 mr-3"></i>Recent Activity
+            </h3>
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                {% for activity in analytics.recent_activity %}
+                <div class="activity-item flex items-center p-3 rounded-lg border-l-4 border-blue-500">
+                    <div class="flex-shrink-0 mr-4">
+                        {% if activity.type == 'user_signup' %}
+                        <i class="fas fa-user-plus text-green-500"></i>
+                        {% elif activity.type == 'trip_created' %}
+                        <i class="fas fa-plane text-blue-500"></i>
+                        {% else %}
+                        <i class="fas fa-activity text-gray-500"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-sm font-medium text-gray-800">{{ activity.description }}</p>
+                        <p class="text-xs text-gray-500">by {{ activity.user }}</p>
+                        <p class="text-xs text-gray-400">{{ activity.date.strftime('%b %d, %Y at %I:%M %p') }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not analytics.recent_activity %}
+                <p class="text-gray-500 text-center py-8">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white admin-card p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-lightning-bolt text-yellow-500 mr-3"></i>Quick Actions
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{{ url_for('admin_users') }}" class="btn bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-users block text-2xl mb-2"></i>
+                <span>Manage Users</span>
+            </a>
+            <a href="{{ url_for('admin_trips') }}" class="btn bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-plane block text-2xl mb-2"></i>
+                <span>View All Trips</span>
+            </a>
+            <button onclick="refreshDashboard()" class="btn bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-sync-alt block text-2xl mb-2"></i>
+                <span>Refresh Data</span>
+            </button>
+            <button onclick="downloadReport()" class="btn bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-lg text-center transition-colors">
+                <i class="fas fa-download block text-2xl mb-2"></i>
+                <span>Export Report</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg text-center">
+        <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4"></i>
+        <p>Loading data...</p>
+    </div>
+</div>
+
+<script>
+// Chart.js Configuration
+Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+Chart.defaults.color = '#374151';
+
+// User Growth Chart
+const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+new Chart(userGrowthCtx, {
+    type: 'line',
+    data: {
+        labels: {{ analytics.user_growth | map(attribute='month') | list | tojson }},
+        datasets: [{
+            label: 'New Users',
+            data: {{ analytics.user_growth | map(attribute='count') | list | tojson }},
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#F3F4F6'
+                }
+            },
+            x: {
+                grid: {
+                    color: '#F3F4F6'
+                }
+            }
+        }
+    }
+});
+
+// Trip Status Chart
+const tripStatusCtx = document.getElementById('tripStatusChart').getContext('2d');
+new Chart(tripStatusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Planned', 'In Progress', 'Completed'],
+        datasets: [{
+            data: [
+                {{ analytics.trip_stats.planned }},
+                {{ analytics.trip_stats.in_progress }},
+                {{ analytics.trip_stats.completed }}
+            ],
+            backgroundColor: ['#F59E0B', '#3B82F6', '#10B981'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Budget Analytics Chart
+const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+const budgetData = {{ analytics.budget_analytics | tojson }};
+new Chart(budgetCtx, {
+    type: 'bar',
+    data: {
+        labels: budgetData.map(item => item.month),
+        datasets: [{
+            label: 'Average Budget',
+            data: budgetData.map(item => item.avg_budget),
+            backgroundColor: '#10B981',
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#F3F4F6'
+                }
+            },
+            x: {
+                grid: {
+                    color: '#F3F4F6'
+                }
+            }
+        }
+    }
+});
+
+// Expense Categories Chart
+const expenseCategoriesCtx = document.getElementById('expenseCategoriesChart').getContext('2d');
+const expenseData = {{ analytics.expense_categories | tojson }};
+new Chart(expenseCategoriesCtx, {
+    type: 'pie',
+    data: {
+        labels: expenseData.map(item => item.category),
+        datasets: [{
+            data: expenseData.map(item => item.total),
+            backgroundColor: [
+                '#EF4444', '#F59E0B', '#10B981', '#3B82F6', 
+                '#8B5CF6', '#F97316', '#06B6D4', '#84CC16'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Expense Trends Chart
+const expenseTrendsCtx = document.getElementById('expenseTrendsChart').getContext('2d');
+new Chart(expenseTrendsCtx, {
+    type: 'line',
+    data: {
+        labels: {{ analytics.expense_trends.months | tojson }},
+        datasets: [{
+            label: 'Monthly Expenses (₹)',
+            data: {{ analytics.expense_trends.amounts | tojson }},
+            borderColor: '#6366F1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#6366F1',
+            pointBorderColor: '#FFFFFF',
+            pointBorderWidth: 2,
+            pointRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Budget vs Actual Chart
+const budgetVsActualCtx = document.getElementById('budgetVsActualChart').getContext('2d');
+new Chart(budgetVsActualCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ analytics.budget_comparison.trip_names | tojson }},
+        datasets: [{
+            label: 'Budget (₹)',
+            data: {{ analytics.budget_comparison.budgets | tojson }},
+            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+            borderColor: '#22C55E',
+            borderWidth: 1
+        }, {
+            label: 'Actual Spent (₹)',
+            data: {{ analytics.budget_comparison.actual | tojson }},
+            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+            borderColor: '#EF4444',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Utility Functions
+function refreshDashboard() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+    
+    // Simulate refresh (in production, this would fetch new data)
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+function downloadReport() {
+    // Generate CSV report
+    const data = {
+        overview: {{ analytics.overview | tojson }},
+        user_growth: {{ analytics.user_growth | tojson }},
+        trip_stats: {{ analytics.trip_stats | tojson }}
+    };
+    
+    const csv = generateCSVReport(data);
+    downloadCSV(csv, 'globetrotter_analytics_report.csv');
+}
+
+function generateCSVReport(data) {
+    let csv = 'GlobeTrotter Analytics Report\n\n';
+    
+    csv += 'Overview Metrics\n';
+    csv += 'Metric,Value\n';
+    csv += `Total Users,${data.overview.total_users}\n`;
+    csv += `Active Users,${data.overview.active_users}\n`;
+    csv += `Total Trips,${data.overview.total_trips}\n`;
+    csv += `Total Expenses,${data.overview.total_expenses}\n\n`;
+    
+    csv += 'User Growth by Month\n';
+    csv += 'Month,New Users\n';
+    data.user_growth.forEach(item => {
+        csv += `${item.month},${item.count}\n`;
+    });
+    
+    return csv;
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename);
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+    fetch('/admin/api/analytics/data')
+        .then(response => response.json())
+        .then(data => {
+            // Update key metrics without full page reload
+            console.log('Analytics data refreshed:', data);
+        })
+        .catch(error => console.error('Error refreshing data:', error));
+}, 300000); // 5 minutes
+</script>
+
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Calendar • {{ trip.title if trip else 'Your Trip' }} • GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/    {% include 'partials/navbar.html' %}
+
+    <!-- Calendar Header -->css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Enhanced Animations */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-slideInUp { animation: slideInUp 0.6s ease-out; }
+        .animate-slideInLeft { animation: slideInLeft 0.6s ease-out; }
+        .animate-fadeIn { animation: fadeIn 0.4s ease-out; }
+        .animate-pulse-hover:hover { animation: pulse 0.6s ease-in-out; }
+        
+        /* Timeline View Styles */
+        .timeline-container {
+            position: relative;
+            padding-left: 60px;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 25px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 16px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-dot:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.4), 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .timeline-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .timeline-card:hover {
+            transform: translateY(-8px) translateX(5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        /* Activity Card Styles */
+        .activity-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            cursor: grab;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .activity-card:hover::before {
+            left: 100%;
+        }
+        
+        .activity-card:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+        }
+        
+        .activity-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+        
+        .activity-card.dragging {
+            opacity: 0.5;
+            transform: rotate(3deg) scale(1.05);
+            z-index: 1000;
+        }
+        
+        .drop-zone {
+            border: 2px dashed #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: #4338ca;
+        }
+        
+        /* FullCalendar Customizations */
+        .fc {
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .fc-theme-standard .fc-list-day-cushion {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+            font-weight: 600 !important;
+        }
+        
+        .fc .fc-button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .fc .fc-button-primary:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #5b21b6 100%) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+        
+        .fc-event {
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
+            border: none !important;
+            font-weight: 500 !important;
+        }
+        
+        .fc-event:hover {
+            transform: scale(1.02) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+        }
+        
+        .fc-toolbar {
+            margin-bottom: 2rem !important;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+        
+        /* Quick Edit Modal */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .edit-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .edit-modal.active .edit-modal-content {
+            transform: scale(1);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .timeline-container {
+                padding-left: 40px;
+            }
+            
+            .timeline-line {
+                left: 15px;
+            }
+            
+            .timeline-dot {
+                left: 8px;
+                width: 16px;
+                height: 16px;
+            }
+            
+            .timeline-card {
+                padding: 1.5rem;
+            }
+        }
+        
+        /* View Toggle Styles */
+        .view-toggle {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .view-toggle button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .view-toggle button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .view-toggle button:not(.active) {
+            background: transparent;
+            color: #6b7280;
+        }
+        
+        .view-toggle button:not(.active):hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen" id="calendar-root" data-trip-id="{{ trip.id if trip else '' }}">
+    {% include 'partials/navbar.html' %}
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <!-- Header -->
+        <header class="mb-8 animate-slideInUp" style="animation-delay: 0.1s;">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div>
+                    <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
+                        {% if trip %}{{ trip.title }} Calendar{% else %}Trip Calendar{% endif %}
+                    </h1>
+                    <p class="text-xl text-gray-600">Plan and visualize your journey through time</p>
+                    {% if trip %}
+                    <div class="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
+                        <span class="flex items-center">
+                            <i class="fas fa-calendar mr-2 text-indigo-500"></i>
+                            {% if trip.start_date %}{{ trip.start_date.strftime('%b %d, %Y') }}{% endif %}{% if trip.end_date %} - {{ trip.end_date.strftime('%b %d, %Y') }}{% endif %}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-indigo-500"></i>
+                            {% if trip.start_date and trip.end_date %}{{ (trip.end_date - trip.start_date).days + 1 }} Days{% else %}--{% endif %}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-rupee-sign mr-2 text-green-500"></i>
+                            ₹{{ "{:,.0f}".format(trip.budget) if trip and trip.budget else "0" }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="view-toggle animate-slideInLeft" style="animation-delay: 0.2s;">
+                    <button id="calendarView" class="active">
+                        <i class="fas fa-calendar-alt"></i>
+                        Calendar
+                    </button>
+                    <button id="timelineView">
+                        <i class="fas fa-stream"></i>
+                        Timeline
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Calendar View -->
+        <div id="calendarViewContainer" class="animate-slideInUp" style="animation-delay: 0.3s;">
+            <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div id="calendar" class="calendar-container"></div>
+            </div>
+        </div>
+
+        <!-- Timeline View (Initially Hidden) -->
+        <div id="timelineViewContainer" class="hidden animate-slideInUp" style="animation-delay: 0.3s;">
+            <div class="timeline-container">
+                <div class="timeline-line"></div>
+                
+                <!-- Loading State -->
+                <div id="timelineLoading" class="text-center py-12">
+                    <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading timeline...
+                    </div>
+                </div>
+                
+                <!-- Timeline Content -->
+                <div id="timelineContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Edit Modal -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Edit Activity</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="editActivityForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Activity Name</label>
+                    <input type="text" id="editActivityName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Enter activity name">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                        <input type="time" id="editStartTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                        <input type="time" id="editEndTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cost (₹)</label>
+                    <input type="number" id="editActivityCost" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="0">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="editActivityNotes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Additional notes..."></textarea>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 font-semibold">
+                        Save Changes
+                    </button>
+                    <button type="button" id="deleteActivity" class="px-6 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-semibold">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Activity Modal -->
+    <div id="addActivityModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Add New Activity</h3>
+                <button id="closeAddModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="addActivityForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Activity Name</label>
+                    <input type="text" id="newActivityName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Enter activity name" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <input type="date" id="newActivityDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                        <input type="time" id="newStartTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                        <input type="time" id="newEndTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cost (₹)</label>
+                    <input type="number" id="newActivityCost" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="0">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="newActivityNotes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="Additional notes..."></textarea>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 font-semibold">
+                        Add Activity
+                    </button>
+                    <button type="button" id="cancelAdd" class="px-6 py-3 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Scripts -->
+    <script src="{{ url_for('static', filename='js/trip-calendar.js') }}"></script>
+    <script>
+        // Initialize the calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const tripId = document.getElementById('calendar-root').dataset.tripId;
+            if (tripId) {
+                window.tripCalendar = new TripCalendar(tripId);
+            } else {
+                console.error('No trip ID found');
+            }
+        });
+    </script>
+</body>
+</html>

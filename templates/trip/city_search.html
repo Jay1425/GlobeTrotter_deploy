@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Search • GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA&libraries=places"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .city-card {
+            transition: all 0.3s ease;
+        }
+        .city-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .pac-container {
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .cost-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        .cost-badge.low { background: linear-gradient(135deg, #10b981, #059669); }
+        .cost-badge.medium { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .cost-badge.high { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'partials/navbar.html' %}
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <!-- Search Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold gradient-text mb-4">Discover Amazing Cities</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Explore destinations worldwide with detailed insights, cost information, and popularity ratings to plan your perfect trip.</p>
+        </header>
+
+        <!-- Advanced Search Form -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <form id="searchForm" class="space-y-6">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Search Input -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="search">
+                            <i class="fas fa-search mr-2 text-indigo-500"></i>Search Cities
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="search" name="search" 
+                                   class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                   placeholder="Enter city name or country...">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-map-marker-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Region Filter -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="region">
+                            <i class="fas fa-globe mr-2 text-indigo-500"></i>Region
+                        </label>
+                        <select id="region" name="region" 
+                                class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <option value="">All Regions</option>
+                            <option value="india">India</option>
+                            <option value="asia">Asia</option>
+                            <option value="europe">Europe</option>
+                            <option value="americas">Americas</option>
+                            <option value="africa">Africa</option>
+                            <option value="oceania">Oceania</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cost and Popularity Filters -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-rupee-sign mr-2 text-indigo-500"></i>Cost Range
+                        </label>
+                        <div class="flex space-x-2">
+                            <button type="button" class="cost-filter flex-1 py-2 px-4 rounded-lg border-2 border-gray-200 text-sm font-medium transition-all hover:border-indigo-300" data-cost="low">
+                                Low Cost
+                            </button>
+                            <button type="button" class="cost-filter flex-1 py-2 px-4 rounded-lg border-2 border-gray-200 text-sm font-medium transition-all hover:border-indigo-300" data-cost="medium">
+                                Medium
+                            </button>
+                            <button type="button" class="cost-filter flex-1 py-2 px-4 rounded-lg border-2 border-gray-200 text-sm font-medium transition-all hover:border-indigo-300" data-cost="high">
+                                Luxury
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-users mr-2 text-indigo-500"></i>Popularity
+                        </label>
+                        <div class="flex space-x-2">
+                            <button type="button" class="popularity-filter flex-1 py-2 px-4 rounded-lg border-2 border-gray-200 text-sm font-medium transition-all hover:border-indigo-300" data-popularity="high">
+                                Popular
+                            </button>
+                            <button type="button" class="popularity-filter flex-1 py-2 px-4 rounded-lg border-2 border-gray-200 text-sm font-medium transition-all hover:border-indigo-300" data-popularity="medium">
+                                Moderate
+                            </button>
+                            <button type="button" class="popularity-filter flex-1 py-2 px-4 rounded-lg border-2 border-gray-200 text-sm font-medium transition-all hover:border-indigo-300" data-popularity="low">
+                                Hidden Gems
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Button -->
+                <div class="text-center">
+                    <button type="submit" 
+                            class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all transform hover:scale-105">
+                        <i class="fas fa-search mr-2"></i>Search Cities
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Interactive Map -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-map mr-2 text-indigo-500"></i>Explore on Map
+            </h2>
+            <div id="map"></div>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Filters</h3>
+            <div class="flex flex-wrap gap-3">
+                <button class="filter-btn px-6 py-2 rounded-full bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all hover:border-indigo-300" data-filter="popular">
+                    <i class="fas fa-fire mr-2"></i>Most Popular
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all hover:border-indigo-300" data-filter="budget">
+                    <i class="fas fa-wallet mr-2"></i>Budget Friendly
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all hover:border-indigo-300" data-filter="weather">
+                    <i class="fas fa-sun mr-2"></i>Great Weather
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all hover:border-indigo-300" data-filter="safe">
+                    <i class="fas fa-shield-alt mr-2"></i>Safe Travel
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white border-2 border-gray-200 text-gray-700 font-medium transition-all hover:border-indigo-300" data-filter="culture">
+                    <i class="fas fa-landmark mr-2"></i>Rich Culture
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div id="resultsSummary" class="hidden mb-6">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <p class="text-indigo-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span id="resultsCount">0</span> cities found matching your criteria
+                </p>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" id="cityResults">
+            <!-- Indian Cities will be loaded here -->
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+            <div class="flex flex-col justify-center items-center py-16">
+                <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent mb-4"></div>
+                <p class="text-gray-600 text-lg">Searching for amazing destinations...</p>
+            </div>
+        </div>
+
+        <!-- No Results State -->
+        <div id="noResults" class="hidden">
+            <div class="text-center py-16">
+                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-2">No cities found</h3>
+                <p class="text-gray-500 mb-6">Try adjusting your search criteria or explore popular destinations</p>
+                <button onclick="loadPopularCities()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors">
+                    Show Popular Cities
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Trip Modal -->
+    <div id="addToTripModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 transform transition-all">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Add to Trip</h3>
+                    <button onclick="closeAddToTripModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-indigo-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-900" id="selectedCityName">City Name</h4>
+                                <p class="text-sm text-gray-600">Adding to your trip</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4 max-h-64 overflow-y-auto" id="tripSelectionList">
+                    <!-- Trips will be loaded here -->
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl"></i>
+                        <p class="mt-2">Loading your trips...</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-between items-center">
+                    <button onclick="closeAddToTripModal()" class="px-4 py-2 text-gray-600 hover:text-gray-700">
+                        Cancel
+                    </button>
+                    <a href="{{ url_for('create_trip') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        Create New Trip
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let marker;
+        let autocomplete;
+        const markers = new Map();
+        let selectedFilters = {
+            cost: null,
+            popularity: null,
+            region: null
+        };
+        
+        // Indian cities data with detailed information
+        const indianCities = [
+            {
+                id: 'jaipur',
+                name: 'Jaipur',
+                state: 'Rajasthan',
+                country: 'India',
+                coordinates: { lat: 26.9124, lng: 75.7873 },
+                rating: 4.6,
+                costIndex: 'medium',
+                popularity: 'high',
+                bestTime: 'Oct-Mar',
+                highlights: ['Pink City', 'Amber Fort', 'City Palace'],
+                avgCost: 3500,
+                safetyRating: 4.2,
+                weatherScore: 4.0,
+                cultureScore: 4.8,
+                imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&h=500&fit=crop'
+            },
+            {
+                id: 'goa',
+                name: 'Goa',
+                state: 'Goa',
+                country: 'India',
+                coordinates: { lat: 15.2993, lng: 74.1240 },
+                rating: 4.5,
+                costIndex: 'medium',
+                popularity: 'high',
+                bestTime: 'Nov-Feb',
+                highlights: ['Beaches', 'Portuguese Architecture', 'Nightlife'],
+                avgCost: 4000,
+                safetyRating: 4.5,
+                weatherScore: 4.3,
+                cultureScore: 4.2,
+                imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&h=500&fit=crop'
+            },
+            {
+                id: 'kerala',
+                name: 'Kochi',
+                state: 'Kerala',
+                country: 'India',
+                coordinates: { lat: 9.9312, lng: 76.2673 },
+                rating: 4.4,
+                costIndex: 'low',
+                popularity: 'medium',
+                bestTime: 'Oct-Mar',
+                highlights: ['Backwaters', 'Spice Markets', 'Chinese Fishing Nets'],
+                avgCost: 2800,
+                safetyRating: 4.6,
+                weatherScore: 3.8,
+                cultureScore: 4.5,
+                imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&h=500&fit=crop'
+            },
+            {
+                id: 'udaipur',
+                name: 'Udaipur',
+                state: 'Rajasthan',
+                country: 'India',
+                coordinates: { lat: 24.5854, lng: 73.7125 },
+                rating: 4.7,
+                costIndex: 'medium',
+                popularity: 'high',
+                bestTime: 'Oct-Mar',
+                highlights: ['City of Lakes', 'Lake Palace', 'Rajput Architecture'],
+                avgCost: 3800,
+                safetyRating: 4.3,
+                weatherScore: 4.1,
+                cultureScore: 4.9,
+                imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=500&fit=crop'
+            },
+            {
+                id: 'varanasi',
+                name: 'Varanasi',
+                state: 'Uttar Pradesh',
+                country: 'India',
+                coordinates: { lat: 25.3176, lng: 82.9739 },
+                rating: 4.3,
+                costIndex: 'low',
+                popularity: 'medium',
+                bestTime: 'Oct-Mar',
+                highlights: ['Spiritual Capital', 'Ganges Ghats', 'Ancient Temples'],
+                avgCost: 2200,
+                safetyRating: 3.8,
+                weatherScore: 3.5,
+                cultureScore: 5.0,
+                imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&h=500&fit=crop'
+            },
+            {
+                id: 'agra',
+                name: 'Agra',
+                state: 'Uttar Pradesh', 
+                country: 'India',
+                coordinates: { lat: 27.1767, lng: 78.0081 },
+                rating: 4.5,
+                costIndex: 'low',
+                popularity: 'high',
+                bestTime: 'Oct-Mar',
+                highlights: ['Taj Mahal', 'Agra Fort', 'Mughal Architecture'],
+                avgCost: 2500,
+                safetyRating: 4.0,
+                weatherScore: 3.7,
+                cultureScore: 4.8,
+                imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&h=500&fit=crop'
+            }
+        ];
+        
+        // Initialize Google Maps
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 20.5937, lng: 78.9629 }, // Center on India
+                zoom: 5,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+
+            const input = document.getElementById('search');
+            autocomplete = new google.maps.places.Autocomplete(input, {
+                types: ['(cities)'],
+                componentRestrictions: { country: 'IN' } // Restrict to India
+            });
+
+            autocomplete.bindTo('bounds', map);
+
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                
+                if (!place.geometry) {
+                    showNotification('No details available for this place', 'error');
+                    return;
+                }
+
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(14);
+                }
+
+                if (marker) {
+                    marker.setMap(null);
+                }
+                
+                marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location,
+                    animation: google.maps.Animation.DROP,
+                    title: place.name
+                });
+
+                const infowindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="p-3 max-w-xs">
+                            <h3 class="font-semibold text-lg">${place.name}</h3>
+                            <p class="text-gray-600 text-sm mb-3">${place.formatted_address}</p>
+                            <button onclick="showAddToTripModal('${place.place_id}', '${place.name}')" 
+                                    class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Add to Trip
+                            </button>
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infowindow.open(map, marker);
+                });
+
+                searchCitiesByName(place.name);
+            });
+        }
+
+        // Load popular cities on page load
+        function loadPopularCities() {
+            displayCities(indianCities);
+            addCityMarkersToMap(indianCities);
+        }
+
+        // Search cities by name
+        function searchCitiesByName(searchTerm) {
+            const filteredCities = indianCities.filter(city => 
+                city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                city.state.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            displayCities(filteredCities);
+            updateResultsSummary(filteredCities.length);
+        }
+
+        // Filter cities based on selected criteria
+        function filterCities() {
+            let filteredCities = [...indianCities];
+
+            if (selectedFilters.cost) {
+                filteredCities = filteredCities.filter(city => city.costIndex === selectedFilters.cost);
+            }
+
+            if (selectedFilters.popularity) {
+                filteredCities = filteredCities.filter(city => city.popularity === selectedFilters.popularity);
+            }
+
+            displayCities(filteredCities);
+            updateResultsSummary(filteredCities.length);
+        }
+
+        // Display cities in the grid
+        function displayCities(cities) {
+            const resultsContainer = document.getElementById('cityResults');
+            const noResults = document.getElementById('noResults');
+            
+            if (cities.length === 0) {
+                resultsContainer.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            
+            resultsContainer.innerHTML = cities.map(city => `
+                <div class="city-card bg-white rounded-2xl shadow-lg overflow-hidden fade-in-up">
+                    <div class="relative">
+                        <img src="${city.imageUrl}" alt="${city.name}" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="cost-badge ${city.costIndex} text-white px-3 py-1 rounded-full text-sm font-medium">
+                                ${city.costIndex.charAt(0).toUpperCase() + city.costIndex.slice(1)} Cost
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">${city.name}</h3>
+                                <p class="text-gray-600">${city.state}, ${city.country}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-indigo-600">₹${city.avgCost.toLocaleString()}</div>
+                                <div class="text-xs text-gray-500">per day</div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-calendar-alt w-5 text-indigo-500"></i>
+                                <span>Best Time: ${city.bestTime}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-shield-alt w-5 text-green-500"></i>
+                                <span>Safety: ${city.safetyRating}/5</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-thermometer-half w-5 text-orange-500"></i>
+                                <span>Weather: ${city.weatherScore}/5</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="text-sm font-medium text-gray-700 mb-2">Top Highlights:</div>
+                            <div class="flex flex-wrap gap-1">
+                                ${city.highlights.slice(0, 3).map(highlight => `
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">${highlight}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <button onclick="showAddToTripModal('${city.id}', '${city.name}')" 
+                                class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add city markers to map
+        function addCityMarkersToMap(cities) {
+            // Clear existing markers
+            markers.forEach(marker => marker.setMap(null));
+            markers.clear();
+
+            cities.forEach(city => {
+                const marker = new google.maps.Marker({
+                    position: city.coordinates,
+                    map: map,
+                    title: city.name,
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23667eea" width="32" height="32"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
+                        scaledSize: new google.maps.Size(32, 32)
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="p-3 max-w-xs">
+                            <h3 class="font-semibold text-lg">${city.name}</h3>
+                            <p class="text-gray-600 text-sm">${city.state}, ${city.country}</p>
+                            <div class="flex items-center my-2">
+                                <span class="ml-3 text-indigo-600 font-semibold">₹${city.avgCost}</span>
+                            </div>
+                            <button onclick="showAddToTripModal('${city.id}', '${city.name}')" 
+                                    class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Add to Trip
+                            </button>
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                markers.set(city.id, marker);
+            });
+        }
+
+        // Update results summary
+        function updateResultsSummary(count) {
+            const summary = document.getElementById('resultsSummary');
+            const countElement = document.getElementById('resultsCount');
+            
+            countElement.textContent = count;
+            summary.classList.remove('hidden');
+        }
+
+        // Add to trip modal functionality
+        let selectedCityData = { id: '', name: '' };
+
+        function showAddToTripModal(cityId, cityName) {
+            selectedCityData = { id: cityId, name: cityName };
+            document.getElementById('selectedCityName').textContent = cityName;
+            document.getElementById('addToTripModal').classList.remove('hidden');
+            loadTripsForSelection();
+        }
+
+        function closeAddToTripModal() {
+            document.getElementById('addToTripModal').classList.add('hidden');
+        }
+
+        async function loadTripsForSelection() {
+            const tripsContainer = document.getElementById('tripSelectionList');
+            
+            try {
+                const response = await fetch('/api/trips');
+                const data = await response.json();
+                
+                if (data.trips && data.trips.length > 0) {
+                    tripsContainer.innerHTML = data.trips.map(trip => `
+                        <div onclick="addToSpecificTrip('${trip.id}', '${trip.title}')" 
+                             class="p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 cursor-pointer transition-all">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">${trip.title}</h4>
+                                    <p class="text-sm text-gray-500">${trip.start_date || 'No date set'} - ${trip.end_date || 'No date set'}</p>
+                                    <p class="text-xs text-indigo-600 mt-1">
+                                        <i class="fas fa-map-marked-alt mr-1"></i>
+                                        ${trip.destinations_count || 0} destinations
+                                    </p>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    tripsContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-suitcase-rolling text-4xl mb-3"></i>
+                            <p>No trips found. Create a new trip to start planning!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading trips:', error);
+                tripsContainer.innerHTML = `
+                    <div class="text-center text-red-500 py-8">
+                        <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                        <p>Failed to load trips. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function addToSpecificTrip(tripId, tripTitle) {
+            const tripsContainer = document.getElementById('tripSelectionList');
+            tripsContainer.innerHTML = `
+                <div class="text-center text-indigo-600 py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl"></i>
+                    <p class="mt-2">Adding ${selectedCityData.name} to ${tripTitle}...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/suggestions/add-to-trip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: selectedCityData.name,
+                        location: selectedCityData.id,
+                        type: 'city',
+                        trip_id: tripId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.ok) {
+                    tripsContainer.innerHTML = `
+                        <div class="text-center text-green-600 py-8">
+                            <i class="fas fa-check-circle text-4xl mb-3"></i>
+                            <p class="text-lg font-semibold">${selectedCityData.name} added successfully!</p>
+                            <p class="text-sm text-gray-600 mt-1">Added to "${tripTitle}"</p>
+                        </div>
+                    `;
+                    
+                    showNotification(`${selectedCityData.name} added to ${tripTitle} successfully!`, 'success');
+                    
+                    setTimeout(() => {
+                        closeAddToTripModal();
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Failed to add city');
+                }
+            } catch (error) {
+                console.error('Error adding city to trip:', error);
+                tripsContainer.innerHTML = `
+                    <div class="text-center text-red-500 py-8">
+                        <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                        <p>Failed to add city to trip</p>
+                        <p class="text-sm text-gray-600 mt-1">${error.message}</p>
+                        <button onclick="loadTripsForSelection()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+                showNotification('Failed to add city to trip. Please try again.', 'error');
+            }
+        }
+
+        // Add to trip functionality (legacy - now redirects to modal)
+        async function addToTrip(cityId, cityName) {
+            showAddToTripModal(cityId, cityName);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg text-white transform translate-x-full transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPopularCities();
+            
+            // Filter button handlers
+            document.querySelectorAll('.cost-filter').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.cost-filter').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
+                    
+                    if (selectedFilters.cost === this.dataset.cost) {
+                        selectedFilters.cost = null;
+                    } else {
+                        selectedFilters.cost = this.dataset.cost;
+                        this.classList.add('bg-indigo-600', 'text-white');
+                    }
+                    
+                    filterCities();
+                });
+            });
+
+            document.querySelectorAll('.popularity-filter').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.popularity-filter').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
+                    
+                    if (selectedFilters.popularity === this.dataset.popularity) {
+                        selectedFilters.popularity = null;
+                    } else {
+                        selectedFilters.popularity = this.dataset.popularity;
+                        this.classList.add('bg-indigo-600', 'text-white');
+                    }
+                    
+                    filterCities();
+                });
+            });
+
+            // Quick filter handlers
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    let filteredCities = [...indianCities];
+                    
+                    switch(filter) {
+                        case 'popular':
+                            filteredCities = filteredCities.filter(city => city.popularity === 'high');
+                            break;
+                        case 'budget':
+                            filteredCities = filteredCities.filter(city => city.costIndex === 'low');
+                            break;
+                        case 'weather':
+                            filteredCities = filteredCities.filter(city => city.weatherScore >= 4.0);
+                            break;
+                        case 'safe':
+                            filteredCities = filteredCities.filter(city => city.safetyRating >= 4.0);
+                            break;
+                        case 'culture':
+                            filteredCities = filteredCities.filter(city => city.cultureScore >= 4.5);
+                            break;
+                    }
+                    
+                    displayCities(filteredCities);
+                    updateResultsSummary(filteredCities.length);
+                });
+            });
+
+            // Search form handler
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const searchTerm = document.getElementById('search').value;
+                const region = document.getElementById('region').value;
+                
+                if (searchTerm) {
+                    searchCitiesByName(searchTerm);
+                } else {
+                    loadPopularCities();
+                }
+            });
+        });
+
+        // Initialize map when page loads
+        window.addEventListener('load', initMap);
+    </script>
+</body>
+</html>

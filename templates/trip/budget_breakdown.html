@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Breakdown • {{ trip.title if trip else 'Trip Budget' }} • GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .budget-card {
+            transition: all 0.3s ease;
+        }
+        .budget-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+        }
+        .expense-item {
+            transition: all 0.2s ease;
+        }
+        .expense-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .alert-banner {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-left: 4px solid #dc2626;
+        }
+        .budget-status.within { background: linear-gradient(135deg, #10b981, #059669); }
+        .budget-status.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .budget-status.exceeded { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-slide-up {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'partials/navbar.html' %}
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold gradient-text mb-2">Budget Breakdown</h1>
+                    <p class="text-xl text-gray-600">{{ trip.title if trip else 'Trip Financial Overview' }}</p>
+                    {% if trip and trip.start_date and trip.end_date %}
+                    <p class="text-sm text-gray-500 mt-1">
+                        <i class="fas fa-calendar mr-2"></i>{{ trip.start_date.strftime('%B %d, %Y') }} - {{ trip.end_date.strftime('%B %d, %Y') }}
+                        <span class="ml-4"><i class="fas fa-clock mr-2"></i>{{ (trip.end_date - trip.start_date).days + 1 }} days</span>
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="text-right">
+                    <div class="budget-status within text-white px-6 py-3 rounded-xl shadow-lg">
+                        <div class="text-2xl font-bold">₹{{ "{:,.0f}".format(budget_summary.total_budget) if budget_summary else "0" }}</div>
+                        <div class="text-sm opacity-90">Total Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Status Alert -->
+        {% if budget_summary and budget_summary.is_over_budget %}
+        <div class="alert-banner text-white p-4 rounded-xl mb-6 animate-slide-up">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
+                <div>
+                    <h3 class="font-semibold text-lg">Budget Alert!</h3>
+                    <p>You're ₹{{ "{:,.0f}".format(budget_summary.over_budget_amount) }} over your planned budget. Consider adjusting your expenses.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="budget-card bg-white rounded-2xl shadow-lg p-6 animate-slide-up">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-wallet text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900">₹{{ "{:,.0f}".format(budget_summary.spent_amount) if budget_summary else "0" }}</div>
+                        <div class="text-sm text-gray-500">Total Spent</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="budget-card bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.1s;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-piggy-bank text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900">₹{{ "{:,.0f}".format(budget_summary.remaining_budget) if budget_summary else "0" }}</div>
+                        <div class="text-sm text-gray-500">Remaining</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="budget-card bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.2s;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-day text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900">₹{{ "{:,.0f}".format(budget_summary.avg_per_day) if budget_summary else "0" }}</div>
+                        <div class="text-sm text-gray-500">Avg per Day</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="budget-card bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.3s;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-percentage text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900">{{ "{:.1f}".format(budget_summary.budget_used_percent) if budget_summary else "0" }}%</div>
+                        <div class="text-sm text-gray-500">Budget Used</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Expense Breakdown Pie Chart -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.4s;">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-chart-pie mr-2 text-indigo-600"></i>Expense Breakdown
+                </h3>
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Daily Spending Bar Chart -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.5s;">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-chart-bar mr-2 text-indigo-600"></i>Daily Spending
+                </h3>
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Category Breakdown -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.6s;">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-list-ul mr-2 text-indigo-600"></i>Category Breakdown
+                </h3>
+                <div class="space-y-4">
+                    {% for category in expense_categories %}
+                    <div class="expense-item p-4 rounded-xl border border-gray-100">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-3" style="background: {{ category.color }}20;">
+                                    <i class="{{ category.icon }} text-lg" style="color: {{ category.color }};"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">{{ category.name }}</h4>
+                                    <p class="text-sm text-gray-500">{{ category.description }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-gray-900">₹{{ "{:,.0f}".format(category.amount) }}</div>
+                                <div class="text-sm text-gray-500">{{ "{:.1f}".format(category.percentage) }}%</div>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: {{ category.percentage }}%; background: {{ category.color }};"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Daily Budget Analysis -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style="animation-delay: 0.7s;">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-calendar-check mr-2 text-indigo-600"></i>Daily Budget Analysis
+                </h3>
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                    {% for day in daily_breakdown %}
+                    <div class="p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">{{ day.date }}</h4>
+                                <p class="text-sm text-gray-500">{{ day.location if day.location else 'General' }}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold {{ 'text-red-600' if day.is_over_budget else 'text-gray-900' }}">
+                                    ₹{{ "{:,.0f}".format(day.amount) }}
+                                </div>
+                                {% if day.is_over_budget %}
+                                <div class="text-xs text-red-500 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>Over budget
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if day.expenses %}
+                        <div class="text-xs text-gray-600">
+                            <span class="mr-2">🏨 ₹{{ day.expenses.accommodation or 0 }}</span>
+                            <span class="mr-2">🍽️ ₹{{ day.expenses.meals or 0 }}</span>
+                            <span class="mr-2">🚗 ₹{{ day.expenses.transport or 0 }}</span>
+                            <span>🎯 ₹{{ day.expenses.activities or 0 }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Management Actions -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mt-8 animate-slide-up" style="animation-delay: 0.8s;">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-tools mr-2 text-indigo-600"></i>Budget Management
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="showAddExpenseModal()" class="p-4 border-2 border-indigo-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all">
+                    <i class="fas fa-plus text-indigo-600 text-2xl mb-2"></i>
+                    <div class="font-semibold text-gray-900">Add Expense</div>
+                    <div class="text-sm text-gray-500">Record new spending</div>
+                </button>
+                
+                <button onclick="showBudgetAdjustModal()" class="p-4 border-2 border-green-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all">
+                    <i class="fas fa-edit text-green-600 text-2xl mb-2"></i>
+                    <div class="font-semibold text-gray-900">Adjust Budget</div>
+                    <div class="text-sm text-gray-500">Modify trip budget</div>
+                </button>
+                
+                <button onclick="generateBudgetReport()" class="p-4 border-2 border-purple-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all">
+                    <i class="fas fa-download text-purple-600 text-2xl mb-2"></i>
+                    <div class="font-semibold text-gray-900">Export Report</div>
+                    <div class="text-sm text-gray-500">Download PDF/Excel</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div id="addExpenseModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Add Expense</h3>
+                    <button onclick="closeAddExpenseModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="expenseForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select id="expenseCategory" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="accommodation">🏨 Accommodation</option>
+                            <option value="meals">🍽️ Meals</option>
+                            <option value="transport">🚗 Transport</option>
+                            <option value="activities">🎯 Activities</option>
+                            <option value="shopping">🛍️ Shopping</option>
+                            <option value="other">📝 Other</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
+                        <input type="number" id="expenseAmount" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="0">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <input type="text" id="expenseDescription" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Brief description">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                        <input type="date" id="expenseDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeAddExpenseModal()" class="px-4 py-2 text-gray-600 hover:text-gray-700">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
+                            Add Expense
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart instances
+        let expenseChart, dailyChart;
+        
+        // Sample data - replace with actual data from backend
+        const sampleExpenseData = {
+            labels: ['Accommodation', 'Meals', 'Transport', 'Activities', 'Shopping', 'Other'],
+            data: [15000, 8000, 5000, 7000, 3000, 2000]
+        };
+        
+        const sampleDailyData = {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+            data: [2500, 3200, 1800, 4500, 2100, 3800, 2600]
+        };
+        
+        // Initialize charts
+        function initializeCharts() {
+            const expenseData = {{ expense_chart_data|safe if expense_chart_data else sampleExpenseData|safe }};
+            const dailyData = {{ daily_chart_data|safe if daily_chart_data else sampleDailyData|safe }};
+            
+            // Expense Breakdown Pie Chart
+            const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+            expenseChart = new Chart(expenseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: expenseData.labels,
+                    datasets: [{
+                        data: expenseData.data,
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                            '#4ecdc4', '#44a08d', '#f7971e', '#ffd200'
+                        ],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Daily Spending Bar Chart
+            const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+            dailyChart = new Chart(dailyCtx, {
+                type: 'bar',
+                data: {
+                    labels: dailyData.labels,
+                    datasets: [{
+                        label: 'Daily Spending',
+                        data: dailyData.data,
+                        backgroundColor: '#667eea',
+                        borderColor: '#764ba2',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Modal functions
+        function showAddExpenseModal() {
+            document.getElementById('addExpenseModal').classList.remove('hidden');
+            document.getElementById('expenseDate').valueAsDate = new Date();
+        }
+        
+        function closeAddExpenseModal() {
+            document.getElementById('addExpenseModal').classList.add('hidden');
+            document.getElementById('expenseForm').reset();
+        }
+        
+        function showBudgetAdjustModal() {
+            alert('Budget adjustment feature coming soon!');
+        }
+        
+        function generateBudgetReport() {
+            alert('Report generation feature coming soon!');
+        }
+        
+        // Handle expense form submission
+        document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                category: document.getElementById('expenseCategory').value,
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                description: document.getElementById('expenseDescription').value,
+                date: document.getElementById('expenseDate').value,
+                trip_id: {{ trip.id if trip else 'null' }}
+            };
+            
+            try {
+                const response = await fetch('/api/expenses/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    showNotification('Expense added successfully!', 'success');
+                    closeAddExpenseModal();
+                    location.reload();
+                } else {
+                    throw new Error(result.error || 'Failed to add expense');
+                }
+            } catch (error) {
+                showNotification('Failed to add expense: ' + error.message, 'error');
+            }
+        });
+        
+        // Notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg text-white transform translate-x-full transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+        });
+    </script>
+</body>
+</html>

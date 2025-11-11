@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Itinerary - GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Enhanced UX Improvements */
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-50px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .animate-slideInScale {
+            animation: slideInScale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .animate-bounceIn {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.8s ease-out;
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .ripple-effect:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Enhanced Card Interactions */
+        .interactive-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .interactive-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .interactive-card:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Improved Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Section Card Styles */
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .section-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Info Box Styles */
+        .info-box {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .info-box:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+        
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tooltip:hover::before,
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Remove Section Button */
+        .remove-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .section-card:hover .remove-btn {
+            opacity: 1;
+        }
+        
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: scale(1.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .section-card {
+                padding: 1rem;
+            }
+            
+            .remove-btn {
+                opacity: 1;
+            }
+        }
+        
+        /* Add button animation */
+        .add-section-btn {
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            background: rgba(102, 126, 234, 0.02);
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .add-section-btn:hover {
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        /* Delete button styles */
+        .btn-delete {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-delete::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-delete:hover::before {
+            left: 100%;
+        }
+        
+        .btn-delete:hover {
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+        }
+        
+        /* Modal styles for delete confirmation */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 400px;
+            margin: 1rem;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        
+        /* Sequence controls */
+        .sequence-controls {
+            user-select: none;
+        }
+        
+        .sequence-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .sequence-btn:hover {
+            background: #f3f4f6;
+            border-color: #6366f1;
+        }
+        
+        .sequence-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .sequence-number {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* Enhanced input styles */
+        .section-card input[type="text"],
+        .section-card input[type="date"],
+        .section-card input[type="number"] {
+            transition: all 0.3s ease;
+        }
+        
+        .section-card input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+        
+        /* Budget display enhancements */
+        .budget-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .budget-input:focus {
+            background: white !important;
+            color: #667eea !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen" id="itinerary-root" data-trip-id="{{ trip.id if trip else '' }}" data-section-count="{{ sections|length if sections is defined else 0 }}">
+    <!-- Include standardized navbar -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Page Title Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 animate-fadeInUp">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">{{ trip.title if trip else 'Trip Itinerary' }}</h1>
+            <p class="text-xl text-gray-600">Plan your perfect Indian adventure step by step</p>
+        </div>
+    </section>
+
+    <!-- Trip Summary Card -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 animate-slideInScale" style="animation-delay: 0.2s;">
+        <div class="interactive-card bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ trip.title if trip else 'Your Trip' }}</h2>
+                    <p class="text-gray-600 mb-4">{% if trip and sections %}{{ sections|map(attribute='name')|list|join(', ') }}{% else %}Add destinations to build your itinerary{% endif %}</p>
+                    <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                        <span class="flex items-center">
+                            <i class="fas fa-calendar mr-2 text-indigo-500"></i>
+                            {% if trip and trip.start_date %}{{ trip.start_date.strftime('%b %d, %Y') }}{% endif %}{% if trip and trip.end_date %} - {{ trip.end_date.strftime('%b %d, %Y') }}{% endif %}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-indigo-500"></i>
+                            {% if trip and trip.start_date and trip.end_date %}{{ (trip.end_date - trip.start_date).days + 1 }} Days{% else %}--{% endif %}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-indigo-500"></i>
+                            {% if trip and sections %}{{ sections|map(attribute='name')|list|join(', ') }}{% else %}--{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500 mb-1">Total Budget</p>
+                        <p id="totalBudgetDisplay" class="text-3xl font-bold text-indigo-600">₹{{ trip.budget|default(0)|int }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Itinerary Sections -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fadeInUp" style="animation-delay: 0.4s;">
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Itinerary Sections</h3>
+            
+            <!-- Itinerary sections container -->
+            <div id="itinerary-sections">
+                {% set idx = 0 %}
+                {% for s in sections %}
+                {% set idx = idx + 1 %}
+                <div class="section-card" data-section="{{ idx }}">
+                    <div class="remove-btn tooltip" data-tooltip="Remove section">
+                        <i class="fas fa-times text-sm"></i>
+                    </div>
+                    
+                    <div class="sequence-controls flex items-center mb-4">
+                        <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                            {{ idx }}
+                        </div>
+                        <div>
+                            <input type="text" class="city-search-input w-full p-2 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" 
+                                   placeholder="Search for a city..." value="{{ s.name if s.name else '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="info-box">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar text-indigo-500 mr-2"></i>
+                                    <span class="font-semibold text-gray-700">Date Range</span>
+                                </div>
+                                <input type="text" class="date-range-picker text-gray-600 bg-transparent border-none outline-none text-right w-36" 
+                                       placeholder="Select dates" value="{{ s.date_range if s.date_range else '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-rupee-sign text-green-500 mr-2"></i>
+                                    <span class="font-semibold text-gray-700">Budget</span>
+                                </div>
+                                <input type="number" min="0" class="budget-input text-gray-600 bg-transparent border-none outline-none text-right w-24" 
+                                       placeholder="₹0" value="{{ s.budget if s.budget else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activities-container">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">Activities</h4>
+                        <div class="activities-list space-y-2">
+                            {% if s.activities %}
+                            {% for activity in s.activities %}
+                            <div class="selected-activity p-3 bg-white border border-gray-200 rounded-lg" data-activity-id="{{ activity.id }}">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h5 class="font-medium text-gray-800">{{ activity.name }}</h5>
+                                        <p class="text-sm text-gray-600">{{ activity.location }}</p>
+                                    </div>
+                                    <button class="text-red-500 hover:text-red-700 transition-colors"
+                                            onclick="removeActivity({{ idx }}, {{ activity.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                        <a href="/trip/{{ trip.id }}/activity-search/{{ idx }}" class="add-activity-btn mt-3 px-4 py-2 text-sm text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Add Activity
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Add Another Section Button -->
+            <button id="add-section-btn" class="add-section-btn w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 mt-6" onclick="addNewSection()">
+                <i class="fas fa-plus mr-2"></i>
+                Add Another Section
+            </button>
+        </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 animate-fadeInUp" style="animation-delay: 0.6s;">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button class="btn-primary ripple-effect flex-1 sm:flex-none" onclick="saveItinerary()">
+                <i class="fas fa-save mr-2"></i>
+                Save Itinerary
+            </button>
+            <a class="btn-secondary flex-1 sm:flex-none" href="/trip/{{ trip.id }}/calendar">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                Calendar View
+            </a>
+            <button class="btn-secondary flex-1 sm:flex-none" onclick="shareItinerary()">
+                <i class="fas fa-share-alt mr-2"></i>
+                Share Itinerary
+            </button>
+            <button class="btn-secondary flex-1 sm:flex-none" onclick="window.location.href='/make-trip'">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Trip Planning
+            </button>
+        </div>
+        
+        <!-- Delete Trip Section -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="text-center">
+                <p class="text-sm text-gray-500 mb-4">Need to remove this trip completely?</p>
+                <button class="btn-delete px-6 py-3 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl font-semibold hover:bg-red-100 hover:border-red-300 hover:text-red-700 transition-all duration-300 transform hover:scale-105" onclick="confirmDeleteTrip()">
+                    <i class="fas fa-trash-alt mr-2"></i>
+                    Delete Trip
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA&libraries=places"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="{{ url_for('static', filename='js/maps-integration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/trip-route-visualizer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/itinerary-manager.js') }}"></script>
+    <script>
+
+        // Add new itinerary section
+        function addNewSection() {
+            sectionCounter++;
+            const sectionsContainer = document.getElementById('itinerary-sections');
+            
+            const newSection = document.createElement('div');
+            newSection.className = 'section-card animate-slideInScale';
+            newSection.setAttribute('data-section', sectionCounter);
+            newSection.style.animationDelay = '0.1s';
+            
+            newSection.innerHTML = `
+                <div class="remove-btn tooltip" data-tooltip="Remove section" onclick="removeSection(${sectionCounter})">
+                    <i class="fas fa-times text-sm"></i>
+                </div>
+                
+                <h4 class="text-xl font-bold text-gray-800 mb-3">Section ${sectionCounter}: New Activity</h4>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">City/Destination</label>
+                    <input type="text" class="city-search-input w-full p-2 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" 
+                           placeholder="Search for a city...">
+                </div>
+                
+                <div class="mb-6">
+                    <textarea class="w-full p-3 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" 
+                              rows="3" 
+                              placeholder="Describe this section of your trip..."
+                              onblur="updateSectionDescription(${sectionCounter}, this.value)"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="info-box">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar text-indigo-500 mr-2"></i>
+                                <span class="font-semibold text-gray-700">Date Range</span>
+                            </div>
+                            <input type="text" class="date-range-picker text-gray-600 bg-transparent border-none outline-none text-right" placeholder="Add dates" />
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-rupee-sign text-green-500 mr-2"></i>
+                                <span class="font-semibold text-gray-700">Budget</span>
+                            </div>
+                            <input type="number" min="0" class="budget-input text-gray-600 bg-transparent border-none outline-none text-right w-24" placeholder="₹0" />
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            sectionsContainer.appendChild(newSection);
+            
+            // Add event listeners to new section
+            addBudgetListeners();
+            updateSectionOrders();
+            
+            // Scroll to new section
+            newSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Focus on textarea
+            setTimeout(() => {
+                const textarea = newSection.querySelector('textarea');
+                textarea.focus();
+            }, 300);
+        }
+
+        // Remove itinerary section
+        function removeSection(sectionId) {
+            const section = document.querySelector(`[data-section="${sectionId}"]`);
+            if (section) {
+                section.style.transform = 'translateX(-100%)';
+                section.style.opacity = '0';
+                setTimeout(() => {
+                    section.remove();
+                }, 300);
+            }
+        }
+
+        // Update section description
+        function updateSectionDescription(sectionId, description) {
+            if (description.trim()) {
+                const section = document.querySelector(`[data-section="${sectionId}"]`);
+                const textarea = section.querySelector('textarea');
+                const descriptionDiv = document.createElement('p');
+                descriptionDiv.className = 'text-gray-600 mb-6';
+                descriptionDiv.textContent = description;
+                
+                textarea.parentNode.replaceChild(descriptionDiv, textarea);
+                
+                // Update title if it's still "New Activity"
+                const title = section.querySelector('h4');
+                if (title.textContent.includes('New Activity')) {
+                    const firstLine = description.split('.')[0].substring(0, 50);
+                    title.textContent = `Section ${sectionId}: ${firstLine}${firstLine.length >= 50 ? '...' : ''}`;
+                }
+            }
+        }
+
+        // Update trip field
+        function updateTripField(field, value) {
+            if (!value.trim()) return;
+            
+            fetch(`/api/trips/{{ trip.id }}/update`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    field: field,
+                    value: value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    // Update duration if dates changed
+                    if (field === 'start_date' || field === 'end_date') {
+                        updateTripDuration();
+                    }
+                    // Update budget status
+                    if (field === 'budget') {
+                        updateBudgetStatus(value);
+                    }
+                    showNotification(`Trip ${field.replace('_', ' ')} updated successfully!`, 'success');
+                } else {
+                    showNotification(`Failed to update trip ${field.replace('_', ' ')}.`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to update trip details.', 'error');
+            });
+        }
+
+        // Update trip duration display
+        function updateTripDuration() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('tripDuration').textContent = `${diffDays} Days`;
+            } else {
+                document.getElementById('tripDuration').textContent = '-- Days';
+            }
+        }
+
+        // Update budget status
+        function updateBudgetStatus(budget) {
+            const status = document.getElementById('budgetStatus');
+            const budgetValue = parseFloat(budget) || 0;
+            if (budgetValue > 0) {
+                status.textContent = `₹${budgetValue.toLocaleString('en-IN')} allocated`;
+            } else {
+                status.textContent = 'No budget set';
+            }
+        }
+
+        // Move section up or down
+        function moveSection(sectionId, direction) {
+            const section = document.querySelector(`[data-section="${sectionId}"]`);
+            const container = document.getElementById('itinerary-sections');
+            
+            if (direction === 'up') {
+                const prevSection = section.previousElementSibling;
+                if (prevSection) {
+                    container.insertBefore(section, prevSection);
+                    updateSequenceNumbers();
+                }
+            } else if (direction === 'down') {
+                const nextSection = section.nextElementSibling;
+                if (nextSection) {
+                    container.insertBefore(nextSection, section);
+                    updateSequenceNumbers();
+                }
+            }
+        }
+
+        // Update section sequence numbers
+        function updateSequenceNumbers() {
+            const sections = document.querySelectorAll('.section-card');
+            sections.forEach((section, index) => {
+                const sequenceNumber = section.querySelector('.sequence-number');
+                if (sequenceNumber) {
+                    sequenceNumber.textContent = index + 1;
+                }
+                section.setAttribute('data-section', index + 1);
+            });
+        }
+
+        // Update section title
+        function updateSectionTitle(sectionId, title) {
+            console.log(`Section ${sectionId} title updated: ${title}`);
+        }
+
+        // Update section date
+        function updateSectionDate(sectionId, date) {
+            console.log(`Section ${sectionId} date updated: ${date}`);
+        }
+
+        // Update section budget
+        function updateSectionBudget(sectionId, budget) {
+            const budgetValue = parseFloat(budget) || 0;
+            console.log(`Section ${sectionId} budget updated: ₹${budgetValue}`);
+            calculateTotalBudget();
+        }
+
+        // Update section duration
+        function updateSectionDuration(sectionId, duration) {
+            console.log(`Section ${sectionId} duration updated: ${duration}`);
+        }
+
+        // Calculate total budget from sections
+        function calculateTotalBudget() {
+            const sectionBudgets = document.querySelectorAll('.budget-input');
+            let totalBudget = 0;
+            
+            sectionBudgets.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                totalBudget += value;
+            });
+            
+            const totalBudgetDisplay = document.getElementById('totalBudgetDisplay');
+            if (totalBudgetDisplay) {
+                totalBudgetDisplay.textContent = '₹ ' + totalBudget.toLocaleString('en-IN');
+            }
+            
+            // Update trip budget in backend if there's a significant change
+            if (totalBudget > 0) {
+                updateTripField('budget', totalBudget);
+            }
+        }
+
+        // Update section order numbers
+        function updateSectionOrders() {
+            const sections = document.querySelectorAll('.section-card');
+            sections.forEach((section, index) => {
+                const orderNumber = section.querySelector('.w-8.h-8');
+                if (orderNumber) {
+                    orderNumber.textContent = index + 1;
+                }
+                section.setAttribute('data-section', index + 1);
+            });
+        }
+
+        // Add event listeners to budget inputs
+        function addBudgetListeners() {
+            const budgetInputs = document.querySelectorAll('.budget-input');
+            budgetInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    calculateTotalBudget();
+                });
+                input.addEventListener('blur', function() {
+                    calculateTotalBudget();
+                });
+            });
+        }
+
+        // Save itinerary with proper data structure
+        function saveItinerary() {
+            const sections = document.querySelectorAll('.section-card');
+            const itineraryData = [];
+            
+            sections.forEach((section, index) => {
+                const cityInput = section.querySelector('.city-search-input');
+                const dateRangeInput = section.querySelector('.date-range-picker');
+                const budgetInput = section.querySelector('.budget-input');
+                
+                const sectionData = {
+                    order: index + 1,
+                    city: cityInput ? cityInput.value.trim() : '',
+                    dateRange: dateRangeInput ? dateRangeInput.value.trim() : '',
+                    budget: budgetInput ? parseFloat(budgetInput.value) || 0 : 0,
+                    activities: []
+                };
+                
+                // Get activities for this section
+                const activities = section.querySelectorAll('.selected-activity');
+                activities.forEach(activity => {
+                    const activityName = activity.querySelector('h5');
+                    const activityLocation = activity.querySelector('p');
+                    
+                    if (activityName) {
+                        sectionData.activities.push({
+                            name: activityName.textContent.trim(),
+                            location: activityLocation ? activityLocation.textContent.trim() : ''
+                        });
+                    }
+                });
+                
+                if (sectionData.city || sectionData.activities.length > 0) {
+                    itineraryData.push(sectionData);
+                }
+            });
+            
+            // Save to backend
+            const saveBtn = document.querySelector('.btn-primary');
+            const originalText = saveBtn.innerHTML;
+            
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            saveBtn.disabled = true;
+            
+            const tripId = parseInt(document.getElementById('itinerary-root')?.dataset.tripId || '0', 10);
+            
+            fetch(`/api/trips/${tripId}/itinerary`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    sections: itineraryData,
+                    totalBudget: calculateTotalBudgetValue()
+                })
+            }).then(r => r.json()).then(resp => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                if (resp && resp.ok) {
+                    showNotification('Itinerary saved successfully!', 'success');
+                    updateSectionOrders();
+                } else {
+                    showNotification('Failed to save itinerary: ' + (resp.error || 'Unknown error'), 'error');
+                }
+            }).catch(error => {
+                console.error('Save error:', error);
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                showNotification('Failed to save itinerary', 'error');
+            });
+        }
+
+        // Get total budget value
+        function calculateTotalBudgetValue() {
+            const budgetInputs = document.querySelectorAll('.budget-input');
+            let total = 0;
+            budgetInputs.forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            return total;
+        }
+
+        // Share itinerary
+        function shareItinerary() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Royal Rajasthan Adventure Itinerary',
+                    text: 'Check out my amazing trip itinerary to Rajasthan!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showNotification('Itinerary link copied to clipboard!', 'success');
+                });
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(full)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Enhanced intersection observer with staggered animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.animationPlayState = 'running';
+                        entry.target.style.opacity = '1';
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.animate-fadeInUp, .animate-slideInLeft, .animate-slideInRight, .animate-slideInScale').forEach((el, index) => {
+            el.style.animationPlayState = 'paused';
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
+
+        // Enhanced button interactions
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.position = 'absolute';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.animation = 'ripple 0.6s linear';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Delete trip functionality
+        function confirmDeleteTrip() {
+            console.log('Delete trip button clicked');
+            const modal = document.getElementById('deleteModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+                console.log('Modal opened');
+                
+                // Force event listeners setup when modal opens
+                setupModalEventListeners();
+            } else {
+                console.error('Delete modal not found');
+            }
+        }
+
+        // Close modal function
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+                console.log('Modal closed');
+            }
+        }
+
+        // Setup modal event listeners
+        function setupModalEventListeners() {
+            const modal = document.getElementById('deleteModal');
+            const cancelBtn = document.getElementById('cancelDelete');
+            const confirmBtn = document.getElementById('confirmDelete');
+            
+            if (!modal || !cancelBtn || !confirmBtn) {
+                console.error('Modal elements not found');
+                return;
+            }
+            
+            // Remove existing listeners by cloning nodes
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            console.log('Setting up fresh event listeners');
+            
+            // Cancel button
+            newCancelBtn.onclick = function(e) {
+                e.preventDefault();
+                console.log('Cancel clicked');
+                closeDeleteModal();
+            };
+            
+            // Confirm delete button
+            newConfirmBtn.onclick = async function(e) {
+                e.preventDefault();
+                console.log('Confirm delete clicked');
+                await handleDeleteTrip(newConfirmBtn);
+            };
+            
+            // Modal overlay click
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    console.log('Overlay clicked');
+                    closeDeleteModal();
+                }
+            };
+        }
+
+        // Handle the actual deletion
+        async function handleDeleteTrip(confirmBtn) {
+            const deleteText = confirmBtn.querySelector('.delete-btn-text');
+            const deleteLoading = confirmBtn.querySelector('.delete-btn-loading');
+            
+            if (!deleteText || !deleteLoading) {
+                console.error('Delete button elements not found');
+                return;
+            }
+            
+            // Get trip ID from the page
+            const tripId = parseInt('{{ trip.id if trip else "0" }}', 10);
+            console.log('Trip ID:', tripId);
+            
+            if (!tripId) {
+                showNotification('Trip ID not found. Cannot delete trip.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            deleteText.classList.add('hidden');
+            deleteLoading.classList.remove('hidden');
+            confirmBtn.disabled = true;
+            
+            console.log('Sending delete request to /api/trips/' + tripId + '/delete');
+            
+            try {
+                const response = await fetch(`/api/trips/${tripId}/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                console.log('Response received:', response.status);
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (response.ok) {
+                    // Show success message
+                    showNotification('Trip deleted successfully!', 'success');
+                    
+                    // Close modal
+                    closeDeleteModal();
+                    
+                    // Redirect to dashboard after short delay
+                    setTimeout(() => {
+                        console.log('Redirecting to dashboard');
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } else {
+                    throw new Error(result.message || 'Failed to delete trip');
+                }
+            } catch (error) {
+                console.error('Error deleting trip:', error);
+                showNotification('Failed to delete trip. Please try again.', 'error');
+                
+                // Reset button state
+                deleteText.classList.remove('hidden');
+                deleteLoading.classList.add('hidden');
+                confirmBtn.disabled = false;
+            }
+        }
+
+        // Initialize basic functionality on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Basic initialization');
+            
+            // Add budget event listeners
+            addBudgetListeners();
+            
+            // Calculate initial total budget
+            calculateTotalBudget();
+            
+            // Update section orders
+            updateSectionOrders();
+            
+            // Initialize budget status
+            const budgetInput = document.getElementById('tripBudget');
+            if (budgetInput && budgetInput.value) {
+                updateBudgetStatus(budgetInput.value);
+            }
+            
+            // Initialize trip duration
+            updateTripDuration();
+            
+            console.log('Basic initialization completed');
+        });
+
+        // Remove activity function
+        function removeActivity(sectionIndex, activityId) {
+            const section = document.querySelector(`[data-section="${sectionIndex}"]`);
+            if (section) {
+                const activity = section.querySelector(`[data-activity-id="${activityId}"]`);
+                if (activity) {
+                    activity.style.transform = 'translateX(-100%)';
+                    activity.style.opacity = '0';
+                    setTimeout(() => {
+                        activity.remove();
+                    }, 300);
+                }
+            }
+        }
+
+        // Initialize animations on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.animate-slideInLeft, .animate-slideInRight').forEach(el => {
+                el.style.animationPlayState = 'running';
+                el.style.opacity = '1';
+            });
+        });
+    </script>
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-2 text-gray-900">Delete Trip</h3>
+                <p class="text-gray-600 mb-6">Are you sure you want to delete this trip? This action cannot be undone and will remove all your itinerary data.</p>
+                
+                <div class="flex gap-3 justify-center">
+                    <button id="cancelDelete" 
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmDelete" 
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        <span class="delete-btn-text">Delete Trip</span>
+                        <span class="delete-btn-loading hidden">
+                            <svg class="animate-spin inline w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Deleting...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

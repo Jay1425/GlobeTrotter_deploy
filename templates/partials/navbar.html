@@ -1,0 +1,207 @@
+<!-- Standardized Navbar for all logged-in pages -->
+<header class="glass-effect sticky top-0 z-50 animate-slideInLeft">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-globe-americas text-white text-lg"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text">GlobeTrotter</span>
+            </div>
+            
+            <!-- Navigation & Profile -->
+            <div class="flex items-center space-x-6">
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="{{ url_for('dashboard') }}" class="text-gray-600 hover:text-indigo-600 transition-colors {{ 'text-indigo-600 font-semibold' if request.endpoint == 'dashboard' else '' }}">Dashboard</a>
+                    <div class="relative group">
+                        <a href="{{ url_for('create_trip') }}" class="text-gray-600 hover:text-indigo-600 transition-colors {{ 'text-indigo-600 font-semibold' if request.endpoint == 'create_trip' else '' }} flex items-center">
+                            Plan Trip
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </a>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="py-1">
+                                <a href="{{ url_for('create_trip') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-plus-circle mr-3 text-indigo-500"></i>
+                                    New Trip
+                                </a>
+                                <a href="javascript:void(0)" onclick="showItineraryModal()" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-route mr-3 text-indigo-500"></i>
+                                    Itinerary Builder
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('trip_city_search') }}" class="text-gray-600 hover:text-indigo-600 transition-colors {{ 'text-indigo-600 font-semibold' if request.endpoint == 'trip_city_search' else '' }} flex items-center">
+                        <i class="fas fa-search-location mr-2 text-sm"></i>
+                        City Search
+                    </a>
+                    <a href="{{ url_for('my_trips') }}" class="text-gray-600 hover:text-indigo-600 transition-colors {{ 'text-indigo-600 font-semibold' if request.endpoint == 'my_trips' else '' }}">My Trips</a>
+                    <a href="{{ url_for('explore_home') }}" class="text-gray-600 hover:text-indigo-600 transition-colors {{ 'text-indigo-600 font-semibold' if request.endpoint == 'explore_home' else '' }}">Explore</a>
+                </nav>
+                <div class="flex items-center space-x-3 relative">
+                    <!-- Notifications -->
+                    <!-- <button id="notifBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors tooltip relative" data-tooltip="Notifications">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        {% if unread_count and unread_count > 0 %}
+                        <span class="absolute -top-1 -right-1 min-w-[0.75rem] h-3 px-1 bg-red-500 text-white text-[10px] leading-3 rounded-full flex items-center justify-center">{{ unread_count }}</span>
+                        {% endif %}
+                    </button>
+                    <div id="notifMenu" class="hidden absolute right-0 top-10 w-80 bg-white shadow-xl rounded-xl border border-gray-100 z-50">
+                        <div class="p-3 border-b flex items-center justify-between">
+                            <span class="font-semibold">Notifications</span>
+                            <button id="markAllRead" class="text-xs text-indigo-600 hover:underline">Mark all read</button>
+                        </div>
+                        <div id="notifList" class="max-h-80 overflow-auto divide-y"></div>
+                        <div class="p-3 text-xs text-gray-500">Stay tuned for travel deals and trip updates.</div>
+                    </div>
+                     -->
+                    <!-- Profile Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleProfileDropdown()" class="flex items-center space-x-2 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors">
+                            {% if current_user and current_user.profile_picture %}
+                            <img src="{{ url_for('static', filename=current_user.profile_picture) }}" 
+                                 alt="Profile" 
+                                 class="w-8 h-8 rounded-full object-cover">
+                            {% else %}
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gray-600 text-sm"></i>
+                            </div>
+                            {% endif %}
+                            <span class="hidden md:block text-sm font-medium text-gray-700">
+                                {{ current_user.first_name if current_user else 'User' }}
+                            </span>
+                            <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div class="py-1">
+                                <a href="/user/profile-settings" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ 'text-blue-600 bg-blue-50 font-medium' if request.endpoint == 'profile_settings' else '' }}">
+                                    <i class="fas fa-user-circle mr-3"></i>
+                                    Profile Settings
+                                </a>
+                                <a href="/user/edit-profile" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ 'text-blue-600 bg-blue-50 font-medium' if request.endpoint == 'edit_profile' else '' }}">
+                                    <i class="fas fa-edit mr-3"></i>
+                                    Edit Profile
+                                </a>
+                                {% if current_user and current_user.is_admin %}
+                                <hr class="my-1">
+                                <a href="/admin" class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50">
+                                    <i class="fas fa-chart-line mr-3"></i>
+                                    Admin Dashboard
+                                </a>
+                                {% endif %}
+                                <hr class="my-1">
+                                <a href="/logout" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-sign-out-alt mr-3"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Itinerary Builder Modal -->
+<div id="itineraryModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Select Trip for Itinerary</h3>
+                <button onclick="closeItineraryModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 max-h-96 overflow-y-auto" id="tripsList">
+                <!-- Trips will be loaded here -->
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl"></i>
+                    <p class="mt-2">Loading your trips...</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-between items-center">
+                <button onclick="closeItineraryModal()" class="px-4 py-2 text-gray-600 hover:text-gray-700">
+                    Cancel
+                </button>
+                <a href="{{ url_for('create_trip') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    Create New Trip
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for navbar functionality -->
+<script>
+    // Profile dropdown functionality
+    function toggleProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('profileDropdown');
+        const profileButton = event.target.closest('button');
+        
+        if (!profileButton || !profileButton.onclick) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    
+    // Itinerary modal functions
+    function showItineraryModal() {
+        const modal = document.getElementById('itineraryModal');
+        modal.classList.remove('hidden');
+        loadTrips();
+    }
+    
+    function closeItineraryModal() {
+        const modal = document.getElementById('itineraryModal');
+        modal.classList.add('hidden');
+    }
+    
+    async function loadTrips() {
+        const tripsContainer = document.getElementById('tripsList');
+        
+        try {
+            const response = await fetch('/api/trips');
+            const data = await response.json();
+            
+            if (data.trips && data.trips.length > 0) {
+                tripsContainer.innerHTML = data.trips.map(trip => `
+                    <a href="/itinerary/${trip.id}" class="block p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-medium text-gray-900">${trip.title}</h4>
+                                <p class="text-sm text-gray-500">${trip.start_date} - ${trip.end_date}</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                tripsContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-suitcase-rolling text-4xl mb-3"></i>
+                        <p>No trips found. Create a new trip to start planning!</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading trips:', error);
+            tripsContainer.innerHTML = `
+                <div class="text-center text-red-500 py-8">
+                    <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                    <p>Failed to load trips. Please try again.</p>
+                </div>
+            `;
+        }
+    }
+</script>

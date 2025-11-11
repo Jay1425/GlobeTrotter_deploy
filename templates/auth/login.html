@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GlobeTrotter • Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="color-scheme" content="light only" />
+  <style>
+    :root {
+      --bg-neutral: #F0F4F8;
+      --text-deep: #1A2B3D;
+      --pale-card: #B8D4E3;
+      --hover-forest: #2563EB;
+      --text-secondary: #64748B;
+      --cta: #3B82F6;
+      --cta-hover: #2563EB;
+      --cool-contrast: #8B5CF6;
+      --error: #DC2626;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+    }
+
+    /* Luxury animated background */
+    .bg-lux-animated {
+      background: linear-gradient(120deg, var(--bg-neutral), var(--pale-card), var(--bg-neutral));
+      background-size: 200% 200%;
+      animation: luxGradient 20s ease-in-out infinite;
+    }
+    @keyframes luxGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating background elements */
+    .blob {
+      filter: blur(22px);
+      opacity: .28;
+      animation: float 30s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(18px, -22px) scale(1.03); }
+      50% { transform: translate(-20px, 14px) scale(.97); }
+      75% { transform: translate(12px, 18px) scale(1.01); }
+    }
+
+    /* Page transition overlay with modern effects */
+    .overlay {
+      transform: scaleX(0);
+      transform-origin: right center;
+      transition: transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1);
+      background: linear-gradient(-45deg, var(--cta), var(--cta-hover), var(--hover-forest));
+      background-size: 200% 200%;
+      animation: gradientFlow 1.2s ease-in-out;
+    }
+    .overlay.active {
+      transform: scaleX(1);
+    }
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Modern entry animations with morphing */
+    .slide-in-right {
+      animation: modernSlideInRight .8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+    .slide-out-left {
+      animation: modernSlideOutLeft .6s cubic-bezier(0.55, 0.085, 0.68, 0.53) both;
+    }
+    @keyframes modernSlideInRight {
+      0% { 
+        opacity: 0; 
+        transform: translateX(60px) scale(0.9) rotateY(10deg);
+        filter: blur(4px);
+      }
+      60% {
+        opacity: 0.8;
+        transform: translateX(10px) scale(1.02) rotateY(2deg);
+        filter: blur(1px);
+      }
+      100% { 
+        opacity: 1; 
+        transform: translateX(0) scale(1) rotateY(0deg);
+        filter: blur(0px);
+      }
+    }
+    @keyframes modernSlideOutLeft {
+      0% { 
+        opacity: 1; 
+        transform: translateX(0) scale(1) rotateY(0deg);
+        filter: blur(0px);
+      }
+      40% {
+        opacity: 0.6;
+        transform: translateX(-20px) scale(0.98) rotateY(-5deg);
+        filter: blur(1px);
+      }
+      100% { 
+        opacity: 0; 
+        transform: translateX(-60px) scale(0.85) rotateY(-15deg);
+        filter: blur(6px);
+      }
+    }
+
+    /* Field stagger animation with bounce */
+    .field-stagger {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 500ms ease;
+    }
+    .field-stagger.animate {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Error shake */
+    .shake {
+      animation: shake .35s ease both;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    /* Floating labels */
+    .field {
+      position: relative;
+    }
+    .field input {
+      padding-top: 1.25rem;
+    }
+    .field label {
+      position: absolute;
+      left: 0.875rem;
+      top: 0.9rem;
+      pointer-events: none;
+      color: var(--text-secondary);
+      transition: transform .2s ease, color .2s ease, top .2s ease;
+      transform-origin: left top;
+    }
+    .field input:focus ~ label,
+    .field input:not(:placeholder-shown) ~ label {
+      top: 0.35rem;
+      color: var(--hover-forest);
+      transform: translateY(-2px) scale(.85);
+    }
+
+    /* Password eye animation */
+    .eye svg {
+      transition: transform 200ms ease;
+    }
+
+    /* Focus ring for accessibility */
+    .focus-ring:focus {
+      outline: 3px solid rgba(77, 188, 65, .6);
+      outline-offset: 2px;
+    }
+
+    /* Fixed button styles - prevent size changes */
+    .btn-stable {
+      min-width: 140px;
+      max-width: 400px;
+      height: 50px;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn-stable:active,
+    .btn-stable:focus {
+      outline: none;
+      min-width: 140px;
+      max-width: 400px;
+      height: 50px;
+      transform: scale(0.98);
+    }
+
+    .btn-stable:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-stable * {
+      pointer-events: none;
+    }
+
+    /* 3D Models and Interactive Elements for Login */
+    .floating-3d {
+      transform-style: preserve-3d;
+      animation: float3D 7s ease-in-out infinite;
+    }
+    @keyframes float3D {
+      0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+      25% { transform: translateY(-12px) rotateX(-5deg) rotateY(-15deg); }
+      50% { transform: translateY(-6px) rotateX(3deg) rotateY(-30deg); }
+      75% { transform: translateY(-10px) rotateX(-2deg) rotateY(-15deg); }
+    }
+
+    .hexagon-3d {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(45deg, rgba(30, 64, 175, 0.4), rgba(77, 188, 65, 0.3));
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      transform-style: preserve-3d;
+      animation: rotateHex 12s linear infinite;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(77, 188, 65, 0.3);
+      box-shadow: 0 8px 32px rgba(30, 64, 175, 0.2);
+    }
+    @keyframes rotateHex {
+      0% { transform: rotateY(0deg) rotateZ(0deg); }
+      100% { transform: rotateY(360deg) rotateZ(60deg); }
+    }
+
+    .torus-3d {
+      width: 50px;
+      height: 50px;
+      border: 8px solid transparent;
+      border-radius: 50%;
+      background: 
+        radial-gradient(circle at center, transparent 60%, rgba(84, 111, 154, 0.4) 65%, transparent 75%),
+        conic-gradient(from 0deg, rgba(77, 188, 65, 0.8), rgba(30, 64, 175, 0.6), rgba(171, 197, 187, 0.7), rgba(77, 188, 65, 0.8));
+      animation: spinTorus 8s linear infinite;
+      filter: drop-shadow(0 5px 15px rgba(77, 188, 65, 0.3));
+    }
+    @keyframes spinTorus {
+      0% { transform: rotateY(0deg) rotateX(0deg); }
+      50% { transform: rotateY(180deg) rotateX(90deg); }
+      100% { transform: rotateY(360deg) rotateX(180deg); }
+    }
+
+    .diamond-3d {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, rgba(171, 197, 187, 0.6), rgba(84, 111, 154, 0.4));
+      transform: rotate(45deg);
+      animation: twistDiamond 10s ease-in-out infinite;
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(171, 197, 187, 0.4);
+      box-shadow: 0 10px 30px rgba(171, 197, 187, 0.3);
+    }
+    .diamond-3d::before {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      background: linear-gradient(45deg, rgba(77, 188, 65, 0.3), transparent);
+      transform: rotate(-45deg);
+    }
+    @keyframes twistDiamond {
+      0%, 100% { transform: rotate(45deg) rotateY(0deg) scale(1); }
+      25% { transform: rotate(45deg) rotateY(90deg) scale(1.1); }
+      50% { transform: rotate(45deg) rotateY(180deg) scale(0.9); }
+      75% { transform: rotate(45deg) rotateY(270deg) scale(1.05); }
+    }
+
+    .portfolio-grid {
+      width: 100px;
+      height: 100px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      transform-style: preserve-3d;
+      animation: portfolioWave 6s ease-in-out infinite;
+    }
+    .portfolio-cell {
+      background: linear-gradient(45deg, rgba(77, 188, 65, 0.4), rgba(30, 64, 175, 0.3));
+      border-radius: 2px;
+      animation: cellPulse 2s ease-in-out infinite;
+      backdrop-filter: blur(4px);
+    }
+    .portfolio-cell:nth-child(odd) { animation-delay: 0.2s; }
+    .portfolio-cell:nth-child(even) { animation-delay: 0.4s; }
+    @keyframes portfolioWave {
+      0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
+      50% { transform: rotateX(15deg) rotateY(25deg); }
+    }
+    @keyframes cellPulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .orbit-system {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      animation: systemRotate 20s linear infinite;
+    }
+    .orbit {
+      position: absolute;
+      border: 1px solid rgba(77, 188, 65, 0.2);
+      border-radius: 50%;
+      animation: counterRotate 20s linear infinite;
+    }
+    .orbit:nth-child(1) {
+      width: 120px;
+      height: 120px;
+      top: 0;
+      left: 0;
+    }
+    .orbit:nth-child(2) {
+      width: 80px;
+      height: 80px;
+      top: 20px;
+      left: 20px;
+      animation-duration: 15s;
+    }
+    .orbit:nth-child(3) {
+      width: 40px;
+      height: 40px;
+      top: 40px;
+      left: 40px;
+      animation-duration: 10s;
+    }
+    .orbit-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, rgba(77, 188, 65, 0.8), transparent);
+      border-radius: 50%;
+      top: -4px;
+      left: 50%;
+      margin-left: -4px;
+    }
+    @keyframes systemRotate {
+      0% { transform: rotateZ(0deg); }
+      100% { transform: rotateZ(360deg); }
+    }
+    @keyframes counterRotate {
+      0% { transform: rotateZ(0deg); }
+      100% { transform: rotateZ(-360deg); }
+    }
+
+    .interactive-hover:hover {
+      transform: translateY(-8px) scale(1.08);
+      transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .neon-glow {
+      position: relative;
+    }
+    .neon-glow::after {
+      content: '';
+      position: absolute;
+      inset: -15px;
+      background: conic-gradient(from 0deg, transparent, rgba(77, 188, 65, 0.2), transparent);
+      border-radius: 50%;
+      animation: neonPulse 3s ease-in-out infinite;
+      z-index: -1;
+    }
+    @keyframes neonPulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .particle-trail {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .trail-particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: linear-gradient(45deg, rgba(77, 188, 65, 0.8), rgba(30, 64, 175, 0.6));
+      border-radius: 50%;
+      animation: trailFloat 12s ease-in-out infinite;
+    }
+    @keyframes trailFloat {
+      0% { transform: translate(0, 100vh) scale(0); opacity: 0; }
+      10% { opacity: 1; transform: translate(20px, 80vh) scale(1); }
+      50% { opacity: 0.7; transform: translate(-30px, 40vh) scale(0.7); }
+      90% { opacity: 0.3; transform: translate(40px, 10vh) scale(0.5); }
+      100% { opacity: 0; transform: translate(-20px, -10vh) scale(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-lux-animated text-[var(--text-deep)]">
+  <!-- Background decorative elements -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
+    <div class="blob absolute -top-24 -right-20 w-96 h-96 rounded-full" 
+         style="background: radial-gradient(circle at 70% 30%, rgba(84,111,154,0.25), transparent 60%);"></div>
+    <div class="blob absolute bottom-0 left-0 w-[30rem] h-[30rem] rounded-full" 
+         style="background: radial-gradient(circle at 50% 50%, rgba(171,197,187,0.25), transparent 60%);"></div>
+    <div class="blob absolute top-1/2 right-1/2 w-80 h-80 rounded-full transform translate-x-1/2 -translate-y-1/2" 
+         style="background: radial-gradient(circle at 60% 40%, rgba(77,188,65,0.15), transparent 70%);"></div>
+  </div>
+
+  <!-- Page transition overlay -->
+  <div id="overlay" class="fixed inset-0 z-20 overlay" style="background: var(--cta);"></div>
+
+  <!-- Main container - proper grid layout -->
+  <main class="relative z-10 min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <!-- Left side decorative content with 3D models -->
+    <aside class="hidden lg:flex items-center justify-center p-12 bg-gradient-to-bl from-white/10 to-transparent order-1 relative overflow-hidden">
+      <!-- Particle Trail System -->
+      <div class="particle-trail">
+        <div class="trail-particle" style="left: 15%; animation-delay: 0s;"></div>
+        <div class="trail-particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="trail-particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="trail-particle" style="left: 70%; animation-delay: 6s;"></div>
+        <div class="trail-particle" style="left: 85%; animation-delay: 8s;"></div>
+      </div>
+
+      <!-- 3D Models Container -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <!-- Rotating Hexagon -->
+        <div class="floating-3d absolute top-16 left-16">
+          <div class="hexagon-3d interactive-hover neon-glow"></div>
+        </div>
+
+        <!-- Spinning Torus -->
+        <div class="floating-3d absolute top-32 right-20" style="animation-delay: -1.5s;">
+          <div class="torus-3d interactive-hover"></div>
+        </div>
+
+        <!-- Twisting Diamond -->
+        <div class="floating-3d absolute bottom-40 left-20" style="animation-delay: -3s;">
+          <div class="diamond-3d interactive-hover neon-glow"></div>
+        </div>
+
+        <!-- Portfolio Grid Animation -->
+        <div class="floating-3d absolute bottom-16 right-16" style="animation-delay: -2s;">
+          <div class="portfolio-grid interactive-hover">
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+            <div class="portfolio-cell"></div>
+          </div>
+        </div>
+
+        <!-- Orbital System -->
+        <div class="floating-3d absolute top-1/2 left-1/3" style="animation-delay: -4s;">
+          <div class="orbit-system interactive-hover">
+            <div class="orbit">
+              <div class="orbit-dot"></div>
+            </div>
+            <div class="orbit">
+              <div class="orbit-dot"></div>
+            </div>
+            <div class="orbit">
+              <div class="orbit-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Decorative Elements -->
+        <div class="floating-3d absolute top-20 right-1/3" style="animation-delay: -2.5s;">
+          <div class="hexagon-3d interactive-hover" style="width: 45px; height: 45px; background: linear-gradient(45deg, rgba(84, 111, 154, 0.5), rgba(171, 197, 187, 0.4));"></div>
+        </div>
+
+        <div class="floating-3d absolute bottom-32 left-1/2" style="animation-delay: -1s;">
+          <div class="torus-3d interactive-hover" style="width: 35px; height: 35px; border-width: 6px;"></div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="max-w-lg text-center relative z-10">
+        <div class="mb-8 inline-flex items-center gap-2 rounded-full bg-white/40 px-4 py-2 text-sm tracking-wide text-[var(--text-secondary)] ring-1 ring-white/50 backdrop-blur">
+          Intelligent • Personalized • Collaborative
+        </div>
+        <h2 class="text-5xl leading-tight font-extrabold text-[var(--text-deep)] mb-6">
+          Welcome Back.<br/>Your Journey Awaits.
+        </h2>
+        <p class="text-lg text-[var(--text-secondary)] leading-relaxed mb-8">
+          Access your personalized travel planning dashboard. Design your dream trips, explore destinations, and make your travel dreams reality.
+        </p>
+        
+        <!-- Interactive Dashboard Preview -->
+        <div class="grid grid-cols-2 gap-4 mt-8">
+          <div class="text-center interactive-hover p-4 rounded-xl bg-white/20 backdrop-blur border border-white/30">
+            <div class="flex items-center justify-center mb-2">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-r from-[var(--cta)] to-[var(--cta-hover)]"></div>
+            </div>
+            <div class="text-xl font-bold text-[var(--cta)] mb-1">127</div>
+            <div class="text-xs text-[var(--text-secondary)]">Countries Explored</div>
+          </div>
+          <div class="text-center interactive-hover p-4 rounded-xl bg-white/20 backdrop-blur border border-white/30">
+            <div class="flex items-center justify-center mb-2">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-r from-[var(--cool-contrast)] to-[var(--hover-forest)]"></div>
+            </div>
+            <div class="text-xl font-bold text-[var(--hover-forest)] mb-1">4.9★</div>
+            <div class="text-xs text-[var(--text-secondary)]">Travel Rating</div>
+          </div>
+        </div>
+
+        <!-- Security Indicators -->
+        <div class="mt-6 flex items-center justify-center space-x-4">
+          <div class="flex items-center space-x-1">
+            <div class="w-2 h-2 bg-[var(--cta)] rounded-full animate-pulse"></div>
+            <span class="text-xs text-[var(--text-secondary)]">Secure Booking</span>
+          </div>
+          <div class="flex items-center space-x-1">
+            <div class="w-2 h-2 bg-[var(--cta)] rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+            <span class="text-xs text-[var(--text-secondary)]">24/7 Support</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Form section - positioned on the right -->
+    <section class="flex items-center justify-center p-6 sm:p-8 lg:p-12 order-2">
+      <div id="card" class="w-full max-w-md rounded-3xl bg-white/80 backdrop-blur-xl shadow-2xl ring-1 ring-white/60 p-8 hover:shadow-3xl transition-all duration-300">
+        <!-- Login Form -->
+        <form id="loginForm" role="form" aria-labelledby="li_title" class="space-y-7" autocomplete="on" method="post" action="{{ url_for('login') }}">
+          {{ form.csrf_token }}
+          <!-- Header -->
+          <header class="space-y-3 mb-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-[var(--cta)] to-[var(--cool-contrast)] mb-4 shadow-lg">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h1 id="li_title" class="text-3xl font-extrabold tracking-tight text-[var(--text-deep)] mb-2">
+              Welcome back
+            </h1>
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Continue your journey with personalized travel planning.
+            </p>
+          </header>
+
+          <!-- Form fields with stagger animation -->
+          <div class="space-y-5">
+          <!-- Google Sign In Button -->
+          <div class="field-stagger">
+            <a href="{{ url_for('google.login') }}"
+               class="btn-stable w-full inline-flex items-center justify-center gap-3 rounded-xl bg-white border border-gray-300 px-6 py-4 font-semibold text-gray-700 shadow-lg transition-all duration-200 hover:scale-[1.02] hover:bg-gray-50 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+               aria-label="Sign in with Google">
+              <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </a>
+          </div>
+
+          <!-- Divider -->
+          <div class="relative my-7">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="bg-white/90 px-4 text-[var(--text-secondary)] font-medium">Or sign in with email</span>
+            </div>
+          </div>            <!-- Divider -->
+            <div class="field-stagger">
+              <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                  <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                  <span class="px-2 bg-white/70 text-[var(--text-secondary)]">or</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="field field-stagger">
+              <div class="relative">
+                <input id="li_email" name="email" type="email" inputmode="email" required placeholder=" " autocomplete="email" value="{{ form.email.data or '' }}"
+                       class="peer w-full rounded-xl border-2 border-gray-200 bg-white/90 px-4 py-4 pl-12 text-[var(--text-deep)] placeholder-transparent shadow-sm transition-all duration-200 focus:border-[var(--cta)] focus:ring-4 focus:ring-[var(--cta)]/20 focus:outline-none hover:border-gray-300" 
+                       aria-required="true" aria-label="Email address" />
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 peer-focus:text-[var(--cta)]">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                  </svg>
+                </div>
+                <label for="li_email" class="absolute left-14 top-4 text-gray-500 text-sm transition-all duration-200 origin-left peer-placeholder-shown:left-14 peer-placeholder-shown:top-4 peer-placeholder-shown:scale-100 peer-focus:left-14 peer-focus:top-1 peer-focus:scale-75 peer-focus:text-[var(--cta)] peer-valid:left-14 peer-valid:top-1 peer-valid:scale-75 peer-valid:text-[var(--cta)]">Email address</label>
+              </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="field field-stagger">
+              <div class="relative">
+                <input id="li_password" name="password" type="password" required placeholder=" " autocomplete="current-password"
+                       class="peer w-full rounded-xl border-2 border-gray-200 bg-white/90 px-4 py-4 pl-12 pr-12 text-[var(--text-deep)] placeholder-transparent shadow-sm transition-all duration-200 focus:border-[var(--cta)] focus:ring-4 focus:ring-[var(--cta)]/20 focus:outline-none hover:border-gray-300" 
+                       aria-required="true" aria-label="Password" />
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 peer-focus:text-[var(--cta)]">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                </div>
+                <button type="button" class="eye absolute inset-y-0 right-0 my-auto mr-3 grid place-items-center rounded-lg p-2 text-gray-400 hover:text-[var(--cta)] focus:outline-none focus:ring-2 focus:ring-[var(--cta)]/20 transition-colors" 
+                        aria-label="Toggle password visibility" aria-pressed="false" data-target="li_password">
+                  <svg class="h-5 w-5 eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="h-5 w-5 eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.74 9.74 0 0 0 5.39-1.61"></path>
+                    <line x1="2" y1="2" x2="22" y2="22"></line>
+                  </svg>
+                </button>
+                <label for="li_password" class="absolute left-14 top-4 text-gray-500 text-sm transition-all duration-200 origin-left peer-placeholder-shown:left-14 peer-placeholder-shown:top-4 peer-placeholder-shown:scale-100 peer-focus:left-14 peer-focus:top-1 peer-focus:scale-75 peer-focus:text-[var(--cta)] peer-valid:left-14 peer-valid:top-1 peer-valid:scale-75 peer-valid:text-[var(--cta)]">Password</label>
+              </div>
+              <!-- Forgot password link -->
+              <div class="mt-3 text-right">
+                <a href="{{ url_for('forgot_password_page') }}" class="text-sm text-[var(--cta)] hover:text-[var(--cta-hover)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--cta)]/20 rounded transition-colors">
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit button -->
+          <div class="field-stagger">
+            <button type="submit" 
+                    class="btn-stable w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--cta)] to-[var(--cta-hover)] px-6 py-4 font-semibold text-white shadow-lg shadow-blue-600/25 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-600/30 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:scale-[0.98]" 
+                    aria-label="Log in">
+              <span>Log in to your account</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </button>
+          </div>
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="mt-4 space-y-2">
+                {% for category, message in messages %}
+                  <div class="text-sm px-3 py-2 rounded-lg {{ 'text-green-700 bg-green-50 border border-green-200' if category=='success' else 'text-red-700 bg-red-50 border border-red-200' }}">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          <!-- Navigation link -->
+      <div class="field-stagger text-center">
+            <p class="text-sm text-[var(--text-secondary)]">
+              New to GlobeTrotter?
+        <a id="toSignup" href="{{ url_for('signup') }}" 
+                 class="font-semibold text-[var(--cta)] hover:text-[var(--cta-hover)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--cta)]/20 rounded ml-1 transition-colors">
+                Create an account
+              </a>
+            </p>
+            
+            <!-- Security badges -->
+            <div class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-gray-200">
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>Secure login</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                </svg>
+                <span>Privacy protected</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation link -->
+      <div class="field-stagger">
+            <p class="text-center text-sm text-[var(--text-secondary)]">
+              Don't have an account?
+        <a id="toSignup" href="{{ url_for('signup') }}" 
+                 class="font-semibold text-[var(--cta)] hover:text-[var(--cta-hover)] hover:underline focus-ring focus:outline-none transition-colors ml-1">
+                Sign up
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      const card = document.getElementById('card');
+      const toSignup = document.getElementById('toSignup');
+      const overlay = document.getElementById('overlay');
+      const staggerElements = document.querySelectorAll('.field-stagger');
+
+      // Check if coming from signup page
+      const cameFrom = sessionStorage.getItem('navFrom');
+      
+      // Initial animations
+      function initializeAnimations() {
+        // If coming from signup, play overlay wipe first
+        if (cameFrom === 'signup') {
+          overlay.style.transformOrigin = 'right center';
+          overlay.classList.add('active');
+          
+          setTimeout(() => {
+            overlay.classList.remove('active');
+            sessionStorage.removeItem('navFrom');
+            startFormAnimations();
+          }, 650);
+        } else {
+          startFormAnimations();
+        }
+      }
+
+      function startFormAnimations() {
+        card.classList.add('slide-in-right');
+        
+        // Enhanced stagger with bounce timing
+        staggerElements.forEach((el, index) => {
+          setTimeout(() => {
+            el.classList.add('animate');
+          }, 400 + (index * 120));
+        });
+
+        // Clean up slide animation class
+        setTimeout(() => {
+          card.classList.remove('slide-in-right');
+        }, 800);
+      }
+
+      // Password visibility toggle
+      document.querySelectorAll('.eye').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          const eyeOpen = btn.querySelector('.eye-open');
+          const eyeClosed = btn.querySelector('.eye-closed');
+          const isPasswordVisible = input.type === 'text';
+          
+          input.type = isPasswordVisible ? 'password' : 'text';
+          btn.setAttribute('aria-pressed', String(!isPasswordVisible));
+          
+          // Toggle eye icons
+          if (isPasswordVisible) {
+            eyeOpen.classList.remove('hidden');
+            eyeClosed.classList.add('hidden');
+          } else {
+            eyeOpen.classList.add('hidden');
+            eyeClosed.classList.remove('hidden');
+          }
+          
+          // Eye icon rotation animation
+          btn.style.transform = 'rotateY(180deg)';
+          setTimeout(() => {
+            btn.style.transform = 'rotateY(0deg)';
+          }, 200);
+        });
+      });
+
+      // Form validation and submission
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+        const email = document.getElementById('li_email');
+        const password = document.getElementById('li_password');
+        
+        let isValid = true;
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.value.trim())) {
+          isValid = false;
+          email.style.borderColor = 'var(--error)';
+          email.style.boxShadow = '0 0 0 4px rgba(220, 38, 38, 0.15)';
+        }
+        
+        // Password validation
+        if (password.value.length < 6) {
+          isValid = false;
+          password.style.borderColor = 'var(--error)';
+          password.style.boxShadow = '0 0 0 4px rgba(220, 38, 38, 0.15)';
+        }
+        
+        if (!isValid) {
+          e.preventDefault();
+          // Shake animation for errors
+          card.classList.remove('shake');
+          void card.offsetWidth; // Force reflow
+          card.classList.add('shake');
+          
+          // Reset error styles after animation
+          setTimeout(() => {
+            [email, password].forEach(input => {
+              input.style.borderColor = '';
+              input.style.boxShadow = '';
+            });
+          }, 2000);
+          
+          return;
+        }
+      });
+
+      // Navigation to signup page with enhanced animation
+      toSignup.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        overlay.style.transformOrigin = 'left center';
+        overlay.classList.add('active');
+        card.classList.add('slide-out-left');
+        sessionStorage.setItem('navFrom', 'login');
+        
+        setTimeout(() => {
+          window.location.href = "{{ url_for('signup') }}?from=login";
+        }, 380);
+      });
+
+      // Initialize animations on load
+      initializeAnimations();
+
+      // Add interactive 3D model click handlers for login page
+      document.querySelectorAll('.interactive-hover').forEach(element => {
+        element.addEventListener('click', function() {
+          // Different click animations for different shapes
+          if (this.classList.contains('hexagon-3d')) {
+            this.style.transform = 'rotateY(720deg) rotateZ(180deg) scale(1.2)';
+          } else if (this.classList.contains('torus-3d')) {
+            this.style.transform = 'rotateX(360deg) rotateY(360deg) scale(1.15)';
+          } else if (this.classList.contains('diamond-3d')) {
+            this.style.transform = 'rotate(225deg) rotateY(360deg) scale(1.1)';
+          } else if (this.classList.contains('orbit-system')) {
+            this.style.transform = 'rotateZ(720deg) scale(1.1)';
+          } else if (this.classList.contains('portfolio-grid')) {
+            this.style.transform = 'rotateX(360deg) rotateY(180deg) scale(1.1)';
+          } else {
+            this.style.transform = 'translateY(-15px) scale(1.15) rotateY(360deg)';
+          }
+          
+          this.style.transition = 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+          
+          setTimeout(() => {
+            this.style.transform = '';
+            this.style.transition = '';
+          }, 800);
+        });
+
+        element.addEventListener('mouseenter', function() {
+          this.style.filter = 'brightness(1.3) drop-shadow(0 12px 30px rgba(77, 188, 65, 0.5))';
+          this.style.zIndex = '10';
+        });
+
+        element.addEventListener('mouseleave', function() {
+          this.style.filter = '';
+          this.style.zIndex = '';
+        });
+      });
+
+      // Dynamic particle trail generation
+      function createTrailParticle() {
+        const trailSystem = document.querySelector('.particle-trail');
+        if (!trailSystem) return;
+
+        const particle = document.createElement('div');
+        particle.className = 'trail-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = '0s';
+        particle.style.animationDuration = (Math.random() * 6 + 8) + 's';
+        
+        // Random colors for variety
+        const colors = [
+          'linear-gradient(45deg, rgba(77, 188, 65, 0.8), rgba(30, 64, 175, 0.6))',
+          'linear-gradient(45deg, rgba(84, 111, 154, 0.7), rgba(171, 197, 187, 0.5))',
+          'linear-gradient(45deg, rgba(171, 197, 187, 0.8), rgba(77, 188, 65, 0.6))'
+        ];
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        
+        trailSystem.appendChild(particle);
+
+        setTimeout(() => {
+          if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+          }
+        }, 12000);
+      }
+
+      // Create trail particles periodically
+      setInterval(createTrailParticle, 3000);
+
+      // Add portfolio cell click animations
+      document.querySelectorAll('.portfolio-cell').forEach((cell, index) => {
+        cell.addEventListener('click', function() {
+          this.style.background = 'linear-gradient(45deg, rgba(77, 188, 65, 0.8), rgba(30, 64, 175, 0.6))';
+          this.style.transform = 'scale(1.3) rotateZ(180deg)';
+          this.style.transition = 'all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
+          
+          setTimeout(() => {
+            this.style.background = '';
+            this.style.transform = '';
+            this.style.transition = '';
+          }, 400);
+        });
+      });
+
+      // Orbital system interaction
+      document.querySelectorAll('.orbit').forEach((orbit, index) => {
+        orbit.addEventListener('mouseenter', function() {
+          this.style.borderColor = 'rgba(77, 188, 65, 0.6)';
+          this.style.borderWidth = '2px';
+          this.style.transform = 'scale(1.1)';
+        });
+
+        orbit.addEventListener('mouseleave', function() {
+          this.style.borderColor = '';
+          this.style.borderWidth = '';
+          this.style.transform = '';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

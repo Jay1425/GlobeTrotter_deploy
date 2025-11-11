@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Trips - GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Enhanced UX Improvements */
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-50px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .animate-slideInScale {
+            animation: slideInScale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .animate-bounceIn {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Enhanced Card Interactions */
+        .interactive-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .interactive-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .interactive-card:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.25), 
+                        0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Enhanced Search Bar */
+        .search-enhanced {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-enhanced:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .search-enhanced input {
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 1rem 3rem 1rem 1.5rem;
+            width: 100%;
+            font-size: 1rem;
+            color: #374151;
+        }
+        
+        .search-enhanced input::placeholder {
+            color: #9CA3AF;
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Filter Dropdown */
+        .dropdown-enhanced {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-enhanced:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        
+        .dropdown-enhanced select {
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            color: #374151;
+            font-weight: 500;
+            appearance: none;
+        }
+        
+        /* Trip Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .status-ongoing {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+        
+        .status-upcoming {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+        }
+        
+        .status-completed {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            color: white;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .search-filters {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .trip-card {
+                min-width: 100%;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trip-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1F2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+        
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1F2937;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Include Navbar -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Page Header -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 animate-fadeInUp">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">My Trips</h1>
+                <p class="text-xl text-gray-600">Manage and explore your travel adventures</p>
+            </div>
+            <div class="header-actions flex space-x-4">
+                <a href="{{ url_for('dashboard') }}" class="btn-secondary flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+                <a href="{{ url_for('create_trip') }}" class="btn-primary flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Plan New Trip
+                </a>
+            </div>
+        </div>
+
+        <!-- Search & Filters Section -->
+        <div class="search-filters flex flex-wrap items-center gap-4 mb-8 animate-slideInRight">
+            <!-- Search Input -->
+            <div class="search-enhanced flex-1 min-w-80">
+                <input type="text" placeholder="Search trips..." id="tripSearch">
+                <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            
+            <!-- Group By Dropdown -->
+            <div class="dropdown-enhanced relative">
+                <select id="groupBy" class="pr-8">
+                    <option value="status">Group by Status</option>
+                    <option value="date">Group by Date</option>
+                    <option value="destination">Group by Destination</option>
+                    <option value="duration">Group by Duration</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+            </div>
+            
+            <!-- Filter Button -->
+            <button class="btn-secondary flex items-center" onclick="toggleFilters()">
+                <i class="fas fa-filter mr-2"></i>
+                Filter
+            </button>
+            
+            <!-- Sort By Dropdown -->
+            <div class="dropdown-enhanced relative">
+                <select id="sortBy" class="pr-8">
+                    <option value="recent">Sort by Recent</option>
+                    <option value="alphabetical">Sort A-Z</option>
+                    <option value="duration">Sort by Duration</option>
+                    <option value="budget">Sort by Budget</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+            </div>
+        </div>
+
+        <!-- Trip Statistics -->
+        <div class="stats-grid grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 animate-bounceIn">
+            <div class="interactive-card p-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-plane-departure text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ stats.ongoing if stats else 0 }}</h3>
+                <p class="text-gray-600">Ongoing Trips</p>
+            </div>
+            
+            <div class="interactive-card p-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-calendar-alt text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ stats.upcoming if stats else 0 }}</h3>
+                <p class="text-gray-600">Upcoming Trips</p>
+            </div>
+            
+            <div class="interactive-card p-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-circle text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ stats.completed if stats else 0 }}</h3>
+                <p class="text-gray-600">Completed Trips</p>
+            </div>
+            
+            <div class="interactive-card p-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-map-marker-alt text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ stats.places if stats else 0 }}</h3>
+                <p class="text-gray-600">Places Visited</p>
+            </div>
+        </div>
+
+        <!-- Ongoing Trips Section -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 animate-slideInLeft">
+                <i class="fas fa-plane text-green-500 mr-3"></i>
+                Ongoing Trips
+            </h2>
+            <div class="trip-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for t in trips_ongoing %}
+                <div class="trip-card interactive-card p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="status-badge status-ongoing">Ongoing</div>
+                        <div class="text-right">
+                            {% if t.start_date and t.end_date %}
+                            <p class="text-sm text-gray-600">{{ (today - t.start_date).days + 1 if today and t.start_date and today >= t.start_date else 1 }} of {{ (t.end_date - t.start_date).days + 1 }}</p>
+                            <div class="progress-bar w-20 mt-1">
+                                {% set total = (t.end_date - t.start_date).days + 1 %}
+                                {% set done = (today - t.start_date).days + 1 if today and t.start_date and today >= t.start_date else 1 %}
+                                {% set pct = (done * 100 // total) if total > 0 else 0 %}
+                                <div class="progress-fill" data-pct="{{ pct }}"></div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <img src="https://source.unsplash.com/featured/400x300?travel&sig={{ loop.index }}" 
+                             alt="{{ t.title }}" class="w-full h-48 object-cover rounded-lg">
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t.title }}</h3>
+                    <div class="flex items-center text-sm text-gray-600 mb-4">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>
+                            {% if t.start_date %}{{ t.start_date.strftime('%b %d, %Y') }}{% endif %}
+                            {% if t.start_date and t.end_date %} - {% endif %}
+                            {% if t.end_date %}{{ t.end_date.strftime('%b %d, %Y') }}{% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <a class="btn-primary flex-1 min-w-[140px] text-center" href="/itinerary/{{ t.id }}">View Details</a>
+                        <a class="btn-secondary" href="/trip/{{ t.id }}/calendar" title="Calendar View">
+                            <i class="fas fa-calendar-alt"></i>
+                        </a>
+                        <a class="btn-secondary" href="/trip/{{ t.id }}/budget" title="Budget Breakdown">
+                            <i class="fas fa-chart-pie"></i>
+                        </a>
+                        <a class="btn-secondary" href="/itinerary/{{ t.id }}" title="View Map">
+                            <i class="fas fa-map"></i>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500">No ongoing trips.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Upcoming Trips Section -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 animate-slideInLeft">
+                <i class="fas fa-calendar-plus text-blue-500 mr-3"></i>
+                Upcoming Trips
+            </h2>
+            <div class="trip-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for t in trips_upcoming %}
+                <div class="trip-card interactive-card p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="status-badge status-upcoming">Upcoming</div>
+                        <div class="text-right">
+                            {% if t.start_date and today %}
+                            <p class="text-sm text-gray-600">In {{ (t.start_date - today).days }} days</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <img src="https://source.unsplash.com/featured/400x300?nature,travel&sig={{ loop.index }}" 
+                             alt="{{ t.title }}" class="w-full h-48 object-cover rounded-lg">
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t.title }}</h3>
+                    <div class="flex items-center text-sm text-gray-600 mb-4">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>
+                            {% if t.start_date %}{{ t.start_date.strftime('%b %d, %Y') }}{% endif %}
+                            {% if t.start_date and t.end_date %} - {% endif %}
+                            {% if t.end_date %}{{ t.end_date.strftime('%b %d, %Y') }}{% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <a class="btn-primary flex-1 min-w-[140px] text-center" href="/itinerary/{{ t.id }}">View Details</a>
+                        <a class="btn-secondary" href="/trip/{{ t.id }}/calendar" title="Calendar View">
+                            <i class="fas fa-calendar-alt"></i>
+                        </a>
+                        <a class="btn-secondary" href="/trip/{{ t.id }}/budget" title="Budget Breakdown">
+                            <i class="fas fa-chart-pie"></i>
+                        </a>
+                        <a class="btn-secondary" href="/itinerary/{{ t.id }}" title="Edit Trip">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500">No upcoming trips.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Completed Trips Section -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 animate-slideInLeft">
+                <i class="fas fa-check-circle text-purple-500 mr-3"></i>
+                Recently Completed
+            </h2>
+            <div class="trip-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for t in trips_completed %}
+                <div class="trip-card interactive-card p-6">
+                    <div class="status-badge status-completed mb-4">Completed</div>
+                    
+                    <div class="mb-4">
+                        <img src="https://source.unsplash.com/featured/400x300?city,travel&sig={{ loop.index }}" 
+                             alt="{{ t.title }}" class="w-full h-40 object-cover rounded-lg">
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">{{ t.title }}</h3>
+                    <div class="flex items-center text-sm text-gray-600 mb-4">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>
+                            {% if t.end_date %}{{ t.end_date.strftime('%b %Y') }}{% elif t.start_date %}{{ t.start_date.strftime('%b %Y') }}{% else %}Completed{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a class="btn-secondary flex-1 min-w-[140px] text-center" href="/itinerary/{{ t.id }}">View Memories</a>
+                        <a class="btn-secondary" href="/trip/{{ t.id }}/calendar" title="Calendar View">
+                            <i class="fas fa-calendar-alt"></i>
+                        </a>
+                        <a class="btn-secondary" href="/trip/{{ t.id }}/budget" title="Budget Breakdown">
+                            <i class="fas fa-chart-pie"></i>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500">No completed trips yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript for Enhanced Interactions -->
+    <script>
+        // Real-time search with API integration
+        let searchTimeout;
+        document.getElementById('tripSearch').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const searchTerm = e.target.value.toLowerCase();
+            
+            // Show loading state
+            const tripSections = document.querySelectorAll('.trip-grid');
+            tripSections.forEach(section => {
+                section.innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-circle-notch fa-spin text-indigo-500 text-2xl"></i></div>';
+            });
+            
+            // Debounce API call
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search/trips?q=${encodeURIComponent(searchTerm)}&sort=${document.getElementById('sortBy').value}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.ok) {
+                            // Group trips by status
+                            const ongoing = data.trips.filter(t => t.status === 'ongoing');
+                            const upcoming = data.trips.filter(t => t.status === 'upcoming');
+                            const completed = data.trips.filter(t => t.status === 'completed');
+                            
+                            // Update sections
+                            updateTripSection('Ongoing Trips', ongoing, 'ongoing');
+                            updateTripSection('Upcoming Trips', upcoming, 'upcoming');
+                            updateTripSection('Recently Completed', completed, 'completed');
+                            
+                            // Update stats
+                            updateStats({
+                                ongoing: ongoing.length,
+                                upcoming: upcoming.length,
+                                completed: completed.length,
+                                places: [...new Set(data.trips.flatMap(t => t.destinations.map(d => d.name)))].length
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Search error:', err);
+                        // Show error state
+                        tripSections.forEach(section => {
+                            section.innerHTML = '<div class="col-span-full text-center py-8 text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Error loading trips</div>';
+                        });
+                    });
+            }, 300);
+        });
+
+        // Live sorting with optimized API
+        document.getElementById('sortBy').addEventListener('change', function(e) {
+            const sortBy = e.target.value;
+            const tripIds = Array.from(document.querySelectorAll('.trip-card')).map(card => card.dataset.tripId);
+            
+            // Show sorting animation
+            document.querySelectorAll('.trip-card').forEach(card => {
+                card.style.opacity = '0.5';
+                card.style.transform = 'scale(0.98)';
+            });
+            
+            fetch('/api/sort/trips', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trip_ids: tripIds, sort_by: sortBy })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    // Rearrange cards based on sorted IDs
+                    const sections = document.querySelectorAll('.trip-grid');
+                    sections.forEach(section => {
+                        const cards = Array.from(section.querySelectorAll('.trip-card'));
+                        const sortedCards = data.sorted_ids
+                            .map(id => cards.find(card => card.dataset.tripId === id))
+                            .filter(Boolean);
+                        
+                        // Clear and reappend in new order
+                        section.innerHTML = '';
+                        sortedCards.forEach(card => {
+                            section.appendChild(card);
+                            // Animate card back in
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'scale(1)';
+                            }, 50);
+                        });
+                    });
+                }
+            });
+        });
+
+        // Smart grouping functionality
+        document.getElementById('groupBy').addEventListener('change', function(e) {
+            const groupBy = e.target.value;
+            const container = document.querySelector('.page-content');
+            
+            // Show loading state
+            container.style.opacity = '0.5';
+            
+            fetch(`/api/search/trips?group=${groupBy}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        let html = '';
+                        
+                        Object.entries(data.groups).forEach(([groupName, trips]) => {
+                            html += `
+                                <section class="mb-12">
+                                    <h2 class="text-3xl font-bold text-gray-900 mb-6 animate-slideInLeft">
+                                        ${getGroupIcon(groupBy, groupName)}
+                                        ${groupName}
+                                    </h2>
+                                    <div class="trip-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        ${trips.map(trip => createTripCard(trip)).join('')}
+                                    </div>
+                                </section>
+                            `;
+                        });
+                        
+                        container.innerHTML = html;
+                        container.style.opacity = '1';
+                        
+                        // Reinitialize card interactions
+                        initializeCardInteractions();
+                    }
+                });
+        });
+
+        // Utility functions for dynamic content
+        function getGroupIcon(groupType, groupName) {
+            const icons = {
+                status: {
+                    ongoing: '<i class="fas fa-plane text-green-500 mr-3"></i>',
+                    upcoming: '<i class="fas fa-calendar-plus text-blue-500 mr-3"></i>',
+                    completed: '<i class="fas fa-check-circle text-purple-500 mr-3"></i>'
+                },
+                date: {
+                    'This Month': '<i class="fas fa-calendar-day text-indigo-500 mr-3"></i>',
+                    'Next Month': '<i class="fas fa-calendar-alt text-blue-500 mr-3"></i>',
+                    'Later': '<i class="fas fa-calendar-week text-purple-500 mr-3"></i>'
+                },
+                destination: '<i class="fas fa-map-marker-alt text-red-500 mr-3"></i>',
+                duration: {
+                    'Short Trip': '<i class="fas fa-hourglass-start text-green-500 mr-3"></i>',
+                    'Medium Trip': '<i class="fas fa-hourglass-half text-yellow-500 mr-3"></i>',
+                    'Long Trip': '<i class="fas fa-hourglass-end text-red-500 mr-3"></i>'
+                }
+            };
+            
+            if (typeof icons[groupType] === 'string') return icons[groupType];
+            return icons[groupType]?.[groupName.toLowerCase()] || '<i class="fas fa-folder mr-3"></i>';
+        }
+
+        function createTripCard(trip) {
+            const startDate = new Date(trip.start_date);
+            const endDate = new Date(trip.end_date);
+            const today = new Date();
+            
+            let statusClass = '';
+            let statusText = '';
+            let progress = '';
+            
+            if (trip.status === 'ongoing') {
+                statusClass = 'status-ongoing';
+                statusText = 'Ongoing';
+                if (startDate && endDate) {
+                    const total = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                    const done = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                    const pct = Math.min(100, Math.max(0, Math.round((done / total) * 100)));
+                    progress = `
+                        <p class="text-sm text-gray-600">${done} of ${total} days</p>
+                        <div class="progress-bar w-20 mt-1">
+                            <div class="progress-fill" style="width: ${pct}%"></div>
+                        </div>
+                    `;
+                }
+            } else if (trip.status === 'upcoming') {
+                statusClass = 'status-upcoming';
+                statusText = 'Upcoming';
+                if (startDate) {
+                    const daysUntil = Math.ceil((startDate - today) / (1000 * 60 * 60 * 24));
+                    progress = `<p class="text-sm text-gray-600">In ${daysUntil} days</p>`;
+                }
+            } else {
+                statusClass = 'status-completed';
+                statusText = 'Completed';
+            }
+            
+            // Get weather info for destinations if available
+            const weatherInfo = trip.destinations.map(dest => 
+                dest.weather ? `
+                    <div class="text-sm text-gray-600 flex items-center mr-3">
+                        <i class="fas ${getWeatherIcon(dest.weather)} mr-1"></i>
+                        ${Math.round(dest.temp)}°
+                    </div>
+                ` : ''
+            ).join('');
+            
+            return `
+                <div class="trip-card interactive-card p-6" data-trip-id="${trip.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="status-badge ${statusClass}">${statusText}</div>
+                        <div class="text-right">
+                            ${progress}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 relative group">
+                        <img src="https://source.unsplash.com/featured/400x300?${encodeURIComponent(trip.destinations[0]?.name || 'travel')}" 
+                             alt="${trip.title}" 
+                             class="w-full h-48 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105">
+                        <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                            <div class="flex justify-end">
+                                ${weatherInfo}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">${trip.title}</h3>
+                    
+                    <div class="flex items-center text-sm text-gray-600 mb-4">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>
+                            ${startDate ? startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                            ${startDate && endDate ? ' - ' : ''}
+                            ${endDate ? endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                        </span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${trip.destinations.map(dest => `
+                            <span class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                ${dest.name}
+                            </span>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <a class="btn-primary flex-1 min-w-[140px] text-center" href="/itinerary/${trip.id}">
+                            ${trip.status === 'completed' ? 'View Memories' : 'View Details'}
+                        </a>
+                        <a class="btn-secondary" href="/trip/${trip.id}/calendar" title="Calendar View">
+                            <i class="fas fa-calendar-alt"></i>
+                        </a>
+                        <a class="btn-secondary" href="/trip/${trip.id}/budget" title="Budget Breakdown">
+                            <i class="fas fa-chart-pie"></i>
+                        </a>
+                        ${trip.status !== 'completed' ? `
+                            <button class="btn-secondary" onclick="editTrip(${trip.id})" title="Edit Trip">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getWeatherIcon(weather) {
+            const icons = {
+                'Clear': 'fa-sun',
+                'Clouds': 'fa-cloud',
+                'Rain': 'fa-cloud-rain',
+                'Snow': 'fa-snowflake',
+                'Thunderstorm': 'fa-bolt',
+                'Drizzle': 'fa-cloud-rain',
+                'Mist': 'fa-smog'
+            };
+            return icons[weather] || 'fa-cloud';
+        }
+
+        function updateTripSection(title, trips, status) {
+            const section = document.querySelector(`section h2:contains('${title}')`).closest('section');
+            if (section) {
+                const grid = section.querySelector('.trip-grid');
+                if (trips.length === 0) {
+                    grid.innerHTML = `<p class="text-gray-500">No ${status} trips.</p>`;
+                } else {
+                    grid.innerHTML = trips.map(trip => createTripCard(trip)).join('');
+                    initializeCardInteractions();
+                }
+            }
+        }
+
+        function updateStats(stats) {
+            const statElements = {
+                ongoing: document.querySelector('.stats-grid div:nth-child(1) h3'),
+                upcoming: document.querySelector('.stats-grid div:nth-child(2) h3'),
+                completed: document.querySelector('.stats-grid div:nth-child(3) h3'),
+                places: document.querySelector('.stats-grid div:nth-child(4) h3')
+            };
+            
+            Object.entries(stats).forEach(([key, value]) => {
+                if (statElements[key]) {
+                    const el = statElements[key];
+                    const oldValue = parseInt(el.textContent);
+                    const newValue = value;
+                    
+                    // Animate number change
+                    animateNumber(el, oldValue, newValue);
+                }
+            });
+        }
+
+        function animateNumber(element, start, end) {
+            const duration = 1000;
+            const steps = 60;
+            const step = (end - start) / steps;
+            let current = start;
+            
+            const update = () => {
+                current += step;
+                element.textContent = Math.round(current);
+                
+                if ((step > 0 && current < end) || (step < 0 && current > end)) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = end;
+                }
+            };
+            
+            requestAnimationFrame(update);
+        }
+
+        // Advanced filtering system
+        function toggleFilters() {
+            const filterPanel = document.querySelector('.filter-panel');
+            if (!filterPanel) {
+                // Create filter panel if it doesn't exist
+                const panel = document.createElement('div');
+                panel.className = 'filter-panel fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+                panel.innerHTML = `
+                    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 animate-slideInScale">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold">Filter Trips</h3>
+                            <button onclick="toggleFilters()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="form-label">Date Range</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="date" class="form-input" id="filterStartDate">
+                                    <input type="date" class="form-input" id="filterEndDate">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Duration</label>
+                                <div class="flex gap-2">
+                                    <button class="px-3 py-1 rounded-full bg-gray-100 hover:bg-indigo-50 hover:text-indigo-600" 
+                                            onclick="setDurationFilter('short')">Short</button>
+                                    <button class="px-3 py-1 rounded-full bg-gray-100 hover:bg-indigo-50 hover:text-indigo-600"
+                                            onclick="setDurationFilter('medium')">Medium</button>
+                                    <button class="px-3 py-1 rounded-full bg-gray-100 hover:bg-indigo-50 hover:text-indigo-600"
+                                            onclick="setDurationFilter('long')">Long</button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Budget Range</label>
+                                <input type="range" class="w-full" min="0" max="100000" step="5000" id="budgetRange">
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>₹0</span>
+                                    <span id="budgetValue">₹50,000</span>
+                                    <span>₹1,00,000+</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button onclick="applyFilters()" class="btn-primary w-full">
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(panel);
+            } else {
+                filterPanel.remove();
+            }
+        }
+
+        function applyFilters() {
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            const budget = document.getElementById('budgetRange').value;
+            const duration = document.querySelector('.duration-selected')?.dataset.duration;
+            
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            if (budget) params.append('max_budget', budget);
+            if (duration) params.append('duration', duration);
+            
+            // Show loading state
+            document.querySelectorAll('.trip-grid').forEach(grid => {
+                grid.innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-circle-notch fa-spin text-indigo-500 text-2xl"></i></div>';
+            });
+            
+            // Fetch filtered results
+            fetch(`/api/search/trips?${params.toString()}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        // Update trip sections with filtered data
+                        updateTripSection('Ongoing Trips', 
+                            data.trips.filter(t => t.status === 'ongoing'), 'ongoing');
+                        updateTripSection('Upcoming Trips', 
+                            data.trips.filter(t => t.status === 'upcoming'), 'upcoming');
+                        updateTripSection('Recently Completed', 
+                            data.trips.filter(t => t.status === 'completed'), 'completed');
+                        
+                        // Close filter panel
+                        document.querySelector('.filter-panel')?.remove();
+                        
+                        // Show filter active indicator
+                        const filterBtn = document.querySelector('button[onclick="toggleFilters()"]');
+                        filterBtn.innerHTML = '<i class="fas fa-filter mr-2"></i>Filters Active';
+                        filterBtn.classList.add('bg-indigo-100', 'text-indigo-600');
+                    }
+                });
+        }
+
+        function setDurationFilter(duration) {
+            const buttons = document.querySelectorAll('[onclick^="setDurationFilter"]');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-indigo-100', 'text-indigo-600', 'duration-selected');
+            });
+            
+            const selectedBtn = document.querySelector(`[onclick="setDurationFilter('${duration}')"]`);
+            selectedBtn.classList.add('bg-indigo-100', 'text-indigo-600', 'duration-selected');
+            selectedBtn.dataset.duration = duration;
+        }
+
+        function editTrip(tripId) {
+            // Show edit modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 animate-slideInScale">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Edit Trip</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="editTripForm" onsubmit="return updateTrip(event, ${tripId})">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="form-label">Trip Name</label>
+                                <input type="text" class="form-input" name="title" required>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" class="form-input" name="start_date">
+                                </div>
+                                <div>
+                                    <label class="form-label">End Date</label>
+                                    <input type="date" class="form-input" name="end_date">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Budget</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2">₹</span>
+                                    <input type="number" class="form-input pl-8" name="budget" min="0">
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4 flex space-x-3">
+                                <button type="submit" class="btn-primary flex-1">Save Changes</button>
+                                <button type="button" onclick="deleteTrip(${tripId})" class="btn-secondary text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Fetch current trip data
+            fetch(`/api/trips/${tripId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        const form = document.getElementById('editTripForm');
+                        form.title.value = data.trip.title;
+                        form.start_date.value = data.trip.start_date;
+                        form.end_date.value = data.trip.end_date;
+                        form.budget.value = data.trip.budget;
+                    }
+                });
+        }
+
+        async function updateTrip(event, tripId) {
+            event.preventDefault();
+            const form = event.target;
+            
+            try {
+                const response = await fetch(`/api/trips/${tripId}/update`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: form.title.value,
+                        start_date: form.start_date.value,
+                        end_date: form.end_date.value,
+                        budget: parseFloat(form.budget.value)
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.ok) {
+                    // Close modal and refresh trips
+                    form.closest('.fixed').remove();
+                    document.getElementById('tripSearch').dispatchEvent(new Event('input'));
+                    
+                    // Show success message
+                    showToast('Trip updated successfully!', 'success');
+                } else {
+                    showToast('Failed to update trip', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred', 'error');
+            }
+            
+            return false;
+        }
+
+        async function deleteTrip(tripId) {
+            if (!confirm('Are you sure you want to delete this trip?')) return;
+            
+            try {
+                const response = await fetch(`/api/trips/${tripId}/delete`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.ok) {
+                    // Remove modal and trip card
+                    document.querySelector('.fixed').remove();
+                    document.querySelector(`[data-trip-id="${tripId}"]`).remove();
+                    
+                    // Update stats
+                    document.getElementById('tripSearch').dispatchEvent(new Event('input'));
+                    showToast('Trip deleted successfully!', 'success');
+                } else {
+                    showToast('Failed to delete trip', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium shadow-lg transform transition-all duration-300 translate-x-full ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Slide in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 10);
+            
+            // Slide out and remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Enhanced card interactions with progressive animations
+        function initializeCardInteractions() {
+            document.querySelectorAll('.interactive-card').forEach((card, index) => {
+                // Add staggered entrance animation
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+                
+                // Add hover interactions
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                    this.style.boxShadow = '0 25px 60px -12px rgba(0, 0, 0, 0.25)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                    this.style.boxShadow = '';
+                });
+            });
+        }
+
+        // Ripple effect for buttons
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all trip cards
+        document.querySelectorAll('.trip-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Hydrate progress bars
+        document.querySelectorAll('.progress-fill[data-pct]').forEach(el => {
+            const pct = parseInt(el.getAttribute('data-pct') || '0', 10);
+            el.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        });
+
+        // Profile dropdown functionality
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdown');
+            const profileButton = event.target.closest('button');
+            
+            if (!profileButton || !profileButton.onclick) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

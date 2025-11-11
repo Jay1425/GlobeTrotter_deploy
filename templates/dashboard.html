@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/fast-utils.js') }}" defer></script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Enhanced UX Improvements */
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1F2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+        
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1F2937;
+            z-index: 1000;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .stat-counter {
+            animation: countUp 1.5s ease-out;
+        }
+        
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .trip-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .destination-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Include standardized navbar -->
+    {% include 'partials/navbar.html' %}
+
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="gradient-bg rounded-2xl p-8 mb-8 text-white fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">
+                        Welcome back, {{ user.first_name if user else 'Traveler' }}! 🌍
+                    </h1>
+                    <p class="text-blue-100 text-lg">
+                        {% if next_trip %}
+                            Your next adventure to <strong>{{ next_trip.title }}</strong> is coming up!
+                        {% else %}
+                            Ready to plan your next adventure?
+                        {% endif %}
+                    </p>
+                    {% if next_trip and next_trip.start_date %}
+                        <p class="text-blue-200 text-sm mt-1">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Departing {{ next_trip.start_date.strftime('%B %d, %Y') }}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="/dashboard/create-trip" 
+                       class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors inline-flex items-center">
+                        <i class="fas fa-plus mr-2"></i>Plan New Trip
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Total Trips</p>
+                        <p class="text-3xl font-bold text-gray-900 stat-counter" data-stat="total_trips">{{ stats.total_trips }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-map-marked-alt text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Places Visited</p>
+                        <p class="text-3xl font-bold text-gray-900 stat-counter" data-stat="places_visited">{{ stats.places_visited }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-globe text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Completed Trips</p>
+                        <p class="text-3xl font-bold text-gray-900 stat-counter" data-stat="completed_trips">{{ stats.completed_trips }}</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Upcoming</p>
+                        <p class="text-3xl font-bold text-gray-900 stat-counter" data-stat="upcoming_trips">{{ stats.upcoming_trips }}</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Highlights -->
+        {% if stats.total_budget > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Total Budget</p>
+                        <p class="text-2xl font-bold text-gray-900" data-stat="total_budget">₹{{ stats.total_budget|int }}</p>
+                        <p class="text-green-600 text-sm mt-1">
+                            <i class="fas fa-rupee-sign mr-1"></i>All planned trips
+                        </p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-wallet text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Average per Trip</p>
+                        <p class="text-2xl font-bold text-gray-900" data-stat="avg_budget">₹{{ stats.avg_budget|int }}</p>
+                        <p class="text-blue-600 text-sm mt-1">
+                            <i class="fas fa-chart-line mr-1"></i>Per adventure
+                        </p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-calculator text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl p-6 shadow-sm mb-8 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+                <button onclick="refreshDashboard()" 
+                        class="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center">
+                    <i class="fas fa-sync-alt mr-1" id="refreshIcon"></i>Refresh Data
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <a href="/dashboard/create-trip" 
+                   class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 hover:bg-indigo-100 transition-colors text-center">
+                    <i class="fas fa-plus-circle text-indigo-600 text-2xl mb-2"></i>
+                    <p class="text-indigo-900 font-semibold">Plan New Trip</p>
+                </a>
+                
+                <a href="/city-search" 
+                   class="bg-green-50 border border-green-200 rounded-lg p-4 hover:bg-green-100 transition-colors text-center">
+                    <i class="fas fa-search text-green-600 text-2xl mb-2"></i>
+                    <p class="text-green-900 font-semibold">Explore Cities</p>
+                </a>
+                
+                <a href="/dashboard/my-trips" 
+                   class="bg-purple-50 border border-purple-200 rounded-lg p-4 hover:bg-purple-100 transition-colors text-center">
+                    <i class="fas fa-list text-purple-600 text-2xl mb-2"></i>
+                    <p class="text-purple-900 font-semibold">View All Trips</p>
+                </a>
+<!--                 
+                <a href="/profile" 
+                   class="bg-orange-50 border border-orange-200 rounded-lg p-4 hover:bg-orange-100 transition-colors text-center">
+                    <i class="fas fa-user-circle text-orange-600 text-2xl mb-2"></i>
+                    <p class="text-orange-900 font-semibold">Manage Profile</p>
+                </a> -->
+            </div>
+        </div>
+
+        <!-- Recent Trips & Recommended Destinations -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Trips -->
+            <div class="fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Recent Trips</h2>
+                    <a href="/dashboard/my-trips" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                
+                {% if recent_trips %}
+                    <div class="space-y-4">
+                        {% for trip in recent_trips %}
+                        <div class="bg-white rounded-xl p-4 shadow-sm card-hover border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold text-gray-900">{{ trip.title }}</h3>
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    {% if trip.status == 'completed' %}bg-green-100 text-green-800
+                                    {% elif trip.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ trip.status.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600 space-x-4">
+                                {% if trip.start_date %}
+                                    <span>
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        {{ trip.start_date.strftime('%b %d, %Y') }}
+                                    </span>
+                                {% endif %}
+                                {% if trip.budget %}
+                                    <span>
+                                        <i class="fas fa-rupee-sign mr-1"></i>
+                                        ₹{{ trip.budget|int }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="mt-3">
+                                <a href="/trip/{{ trip.id }}" 
+                                   class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                                    View Details <i class="fas fa-external-link-alt ml-1 text-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-map text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">No trips yet</h3>
+                        <p class="text-gray-500 mb-4">Start planning your first adventure!</p>
+                        <a href="/dashboard/create-trip" 
+                           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Plan Your First Trip
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recommended Destinations -->
+            <div class="fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Recommended Destinations</h2>
+                    <a href="/city-search" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                        Explore More <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                
+                {% if recommended_destinations %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for destination in recommended_destinations[:6] %}
+                        <div class="relative overflow-hidden rounded-xl card-hover">
+                            <div class="destination-card h-24 p-4 flex items-end">
+                                <div class="text-white">
+                                    <h3 class="font-semibold text-sm">
+                                        {% if destination.title %}
+                                            {{ destination.title }}
+                                        {% elif destination.name %}
+                                            {{ destination.name }}
+                                        {% else %}
+                                            {{ destination.city or 'Unknown' }}
+                                        {% endif %}
+                                    </h3>
+                                    <p class="text-xs opacity-90">
+                                        {% if destination.city and destination.country %}
+                                            {{ destination.city }}, {{ destination.country }}
+                                        {% elif destination.country %}
+                                            {{ destination.country }}
+                                        {% endif %}
+                                    </p>
+                                    <div class="flex items-center mt-1" data-rating-container="{{ destination.id }}">
+                                        <div class="star-rating" data-destination-id="{{ destination.id }}" data-current-rating="{{ destination.rating or 0 }}">
+                                            {% for i in range(1, 6) %}
+                                            <i class="fas fa-star text-xs cursor-pointer transition-colors duration-200 {{ 'text-yellow-300' if destination.rating and i <= destination.rating else 'text-gray-300' }}"
+                                               data-rating="{{ i }}"
+                                               onmouseover="highlightStars(this)"
+                                               onmouseout="resetStars(this)"
+                                               onclick="rateDestination(this)"></i>
+                                            {% endfor %}
+                                        </div>
+                                        <span class="text-xs ml-2 text-white rating-value">{{ destination.rating or 'Not rated' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-globe-asia text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">No recommendations yet</h3>
+                        <p class="text-gray-500 mb-4">Start adding destinations to your wishlist!</p>
+                        <a href="/city-search" 
+                           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-search mr-2"></i>Explore Cities
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animate counter numbers
+        document.addEventListener('DOMContentLoaded', function() {
+            const counters = document.querySelectorAll('.stat-counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.textContent);
+                let current = 0;
+                const increment = target / 50;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = Math.floor(current);
+                }, 20);
+            });
+        });
+
+        // Live data refresh functionality
+        async function refreshDashboard() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('fa-spin');
+            
+            try {
+                // Update statistics
+                const statsResponse = await fetch('/api/dashboard/stats');
+                if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    updateStatsDisplay(statsData.stats);
+                }
+                
+                // Update recent trips
+                const tripsResponse = await fetch('/api/dashboard/recent-trips?limit=3');
+                if (tripsResponse.ok) {
+                    const tripsData = await tripsResponse.json();
+                    updateRecentTrips(tripsData.trips);
+                }
+                
+                // Show success message
+                showNotification('Dashboard data refreshed successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error refreshing dashboard:', error);
+                showNotification('Failed to refresh dashboard data', 'error');
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        // Update stats display
+        function updateStatsDisplay(stats) {
+            const statElements = {
+                'total_trips': document.querySelector('[data-stat="total_trips"]'),
+                'places_visited': document.querySelector('[data-stat="places_visited"]'),
+                'completed_trips': document.querySelector('[data-stat="completed_trips"]'),
+                'upcoming_trips': document.querySelector('[data-stat="upcoming_trips"]')
+            };
+            
+            Object.keys(statElements).forEach(key => {
+                const element = statElements[key];
+                if (element && stats[key] !== undefined) {
+                    element.textContent = stats[key];
+                    element.classList.add('stat-counter');
+                }
+            });
+            
+            // Update budget displays if they exist
+            if (stats.total_budget > 0) {
+                const totalBudgetEl = document.querySelector('[data-stat="total_budget"]');
+                const avgBudgetEl = document.querySelector('[data-stat="avg_budget"]');
+                
+                if (totalBudgetEl) {
+                    totalBudgetEl.textContent = '₹' + stats.total_budget.toLocaleString('en-IN');
+                }
+                if (avgBudgetEl) {
+                    avgBudgetEl.textContent = '₹' + stats.avg_budget.toLocaleString('en-IN');
+                }
+            }
+        }
+
+        // Update recent trips section
+        function updateRecentTrips(trips) {
+            // This would update the trips display dynamically
+            // For now, we'll just show a notification that data was refreshed
+            console.log('Updated trips:', trips);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg text-white transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Rating functionality
+        function highlightStars(star) {
+            const container = star.closest('.star-rating');
+            const stars = container.querySelectorAll('.fa-star');
+            const rating = parseInt(star.dataset.rating);
+            
+            stars.forEach((s, index) => {
+                s.classList.toggle('text-yellow-300', index < rating);
+                s.classList.toggle('text-gray-300', index >= rating);
+            });
+        }
+
+        function resetStars(star) {
+            const container = star.closest('.star-rating');
+            const stars = container.querySelectorAll('.fa-star');
+            const currentRating = parseFloat(container.dataset.currentRating);
+            
+            stars.forEach((s, index) => {
+                s.classList.toggle('text-yellow-300', index < currentRating);
+                s.classList.toggle('text-gray-300', index >= currentRating);
+            });
+        }
+
+        async function rateDestination(star) {
+            const container = star.closest('.star-rating');
+            const destinationId = container.dataset.destinationId;
+            const rating = parseInt(star.dataset.rating);
+            
+            try {
+                const response = await fetch(`/api/recommendations/${destinationId}/rate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ rating })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    container.dataset.currentRating = rating;
+                    
+                    // Update UI
+                    const ratingValue = container.parentElement.querySelector('.rating-value');
+                    if (ratingValue) {
+                        ratingValue.textContent = rating;
+                    }
+                    
+                    showNotification('Rating updated successfully!', 'success');
+                } else {
+                    throw new Error('Failed to update rating');
+                }
+            } catch (error) {
+                console.error('Error updating rating:', error);
+                showNotification('Failed to update rating. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeTrotter - Explore the World</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+                             <div>
+                            <h4 class="font-bold text-gray-800">Priya Sharma</h4>
+                        </div>ot {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+        
+        .place-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        
+        .place-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 50%);
+            display: flex;
+            align-items: end;
+            padding: 1.5rem;
+        }
+        
+        .stats-counter {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .floating-element {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md z-50 border-b border-gray-200">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-amber-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-globe-americas text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">GlobeTrotter</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="#destinations" class="text-gray-600 hover:text-blue-600 transition-colors">Destinations</a>
+                    <a href="#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                </div>
+                
+                                <div class="flex space-x-3">
+                                    <a href="{{ url_for('login') }}" 
+                                       class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                                        Login
+                                    </a>
+                                    <a href="{{ url_for('signup') }}" 
+                                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        Sign Up
+                                    </a>
+                                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient min-h-screen flex items-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-blue-800/90"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-white">
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Discover Incredible
+                        <span class="block text-amber-400">India</span>
+                    </h1>
+                    <p class="text-xl mb-8 text-blue-100">
+                        Explore India's rich heritage, diverse culture, and breathtaking landscapes. From the Himalayas to the backwaters, experience the magic of India.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="{{ url_for('signup') }}" 
+                           class="inline-flex items-center justify-center px-8 py-4 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-all hover:scale-105">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Start Your India Journey
+                        </a>
+                        <a href="#destinations" 
+                           class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-all">
+                            <i class="fas fa-map mr-2"></i>
+                            Explore India
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="floating-element">
+                        <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&h=400&fit=crop&crop=center" 
+                             alt="Taj Mahal, India" 
+                             class="rounded-2xl shadow-2xl w-full">
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-flag text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">1M+ India Travelers</p>
+                                <p class="text-sm text-gray-600">Trust GlobeTrotter</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 right-10 text-white/20 floating-element" style="animation-delay: -1s;">
+            <i class="fas fa-plane text-4xl"></i>
+        </div>
+        <div class="absolute bottom-20 left-10 text-white/20 floating-element" style="animation-delay: -2s;">
+            <i class="fas fa-compass text-3xl"></i>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="text-center scroll-reveal">
+                    <div class="stats-counter">28</div>
+                    <p class="text-gray-600 font-medium">States & UTs</p>
+                </div>
+                <div class="text-center scroll-reveal" style="animation-delay: 0.1s;">
+                    <div class="stats-counter">1M+</div>
+                    <p class="text-gray-600 font-medium">India Travelers</p>
+                </div>
+                <div class="text-center scroll-reveal" style="animation-delay: 0.2s;">
+                    <div class="stats-counter">5000+</div>
+                    <p class="text-gray-600 font-medium">Destinations</p>
+                </div>
+                <div class="text-center scroll-reveal" style="animation-delay: 0.3s;">
+                    <div class="stats-counter">4.8</div>
+                    <p class="text-gray-600 font-medium">Rating</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Most Visited Places -->
+    <section id="destinations" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Most Visited Places in India</h2>
+                <p class="text-xl text-gray-600">Discover India's most popular and breathtaking destinations</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Taj Mahal, Agra -->
+                <div class="place-card card-hover scroll-reveal">
+                    <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&h=300&fit=crop&crop=center" 
+                         alt="Taj Mahal, Agra" class="w-full h-64 object-cover">
+                    <div class="place-overlay">
+                        <div class="text-white">
+                            <h3 class="text-xl font-bold mb-1">Taj Mahal, Agra</h3>
+                            <p class="text-sm text-gray-200 mb-2">Symbol of Love & UNESCO World Heritage</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-users mr-1"></i> 6M+ visitors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jaipur, Rajasthan -->
+                <div class="place-card card-hover scroll-reveal" style="animation-delay: 0.1s;">
+                    <img src="https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&h=300&fit=crop&crop=center" 
+                         alt="Jaipur Pink City" class="w-full h-64 object-cover">
+                    <div class="place-overlay">
+                        <div class="text-white">
+                            <h3 class="text-xl font-bold mb-1">Jaipur, Rajasthan</h3>
+                            <p class="text-sm text-gray-200 mb-2">The Pink City & Royal Heritage</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-users mr-1"></i> 5M+ visitors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kerala Backwaters -->
+                <div class="place-card card-hover scroll-reveal" style="animation-delay: 0.2s;">
+                    <img src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400&h=300&fit=crop&crop=center" 
+                         alt="Kerala Backwaters" class="w-full h-64 object-cover">
+                    <div class="place-overlay">
+                        <div class="text-white">
+                            <h3 class="text-xl font-bold mb-1">Kerala Backwaters</h3>
+                            <p class="text-sm text-gray-200 mb-2">God's Own Country & Houseboat Cruises</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-users mr-1"></i> 4M+ visitors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goa Beaches -->
+                <div class="place-card card-hover scroll-reveal" style="animation-delay: 0.3s;">
+                    <img src="https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&h=300&fit=crop&crop=center" 
+                         alt="Goa Beaches" class="w-full h-64 object-cover">
+                    <div class="place-overlay">
+                        <div class="text-white">
+                            <h3 class="text-xl font-bold mb-1">Goa Beaches</h3>
+                            <p class="text-sm text-gray-200 mb-2">Sun, Sand & Portuguese Heritage</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-users mr-1"></i> 8M+ visitors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kashmir Valley -->
+                <div class="place-card card-hover scroll-reveal" style="animation-delay: 0.4s;">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&crop=center" 
+                         alt="Kashmir Valley" class="w-full h-64 object-cover">
+                    <div class="place-overlay">
+                        <div class="text-white">
+                            <h3 class="text-xl font-bold mb-1">Kashmir Valley</h3>
+                            <p class="text-sm text-gray-200 mb-2">Paradise on Earth & Dal Lake</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-users mr-1"></i> 2M+ visitors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Varanasi -->
+                <div class="place-card card-hover scroll-reveal" style="animation-delay: 0.5s;">
+                    <img src="https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=400&h=300&fit=crop&crop=center" 
+                         alt="Varanasi Ghats" class="w-full h-64 object-cover">
+                    <div class="place-overlay">
+                        <div class="text-white">
+                            <h3 class="text-xl font-bold mb-1">Varanasi, UP</h3>
+                            <p class="text-sm text-gray-200 mb-2">Spiritual Capital & Sacred Ganges</p>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-users mr-1"></i> 3M+ visitors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Why Choose GlobeTrotter?</h2>
+                <p class="text-xl text-gray-600">Everything you need for the perfect travel experience</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="text-center p-6 card-hover scroll-reveal">
+                    <div class="w-16 h-16 feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-route text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Smart Planning</h3>
+                    <p class="text-gray-600">AI-powered trip planning that adapts to your preferences and budget.</p>
+                </div>
+
+                <div class="text-center p-6 card-hover scroll-reveal" style="animation-delay: 0.1s;">
+                    <div class="w-16 h-16 feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Travel Community</h3>
+                    <p class="text-gray-600">Connect with like-minded travelers and share experiences.</p>
+                </div>
+
+                <div class="text-center p-6 card-hover scroll-reveal" style="animation-delay: 0.2s;">
+                    <div class="w-16 h-16 feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Safe & Secure</h3>
+                    <p class="text-gray-600">24/7 support and secure booking with travel insurance options.</p>
+                </div>
+
+                <div class="text-center p-6 card-hover scroll-reveal" style="animation-delay: 0.3s;">
+                    <div class="w-16 h-16 feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Mobile Experience</h3>
+                    <p class="text-gray-600">Access everything on-the-go with our responsive design.</p>
+                </div>
+
+                <div class="text-center p-6 card-hover scroll-reveal" style="animation-delay: 0.4s;">
+                    <div class="w-16 h-16 feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-gem text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Premium Experiences</h3>
+                    <p class="text-gray-600">Curated experiences and exclusive deals for members.</p>
+                </div>
+
+                <div class="text-center p-6 card-hover scroll-reveal" style="animation-delay: 0.5s;">
+                    <div class="w-16 h-16 feature-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-headset text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">24/7 Support</h3>
+                    <p class="text-gray-600">Round-the-clock customer support wherever you are.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-gradient-to-r from-blue-50 to-amber-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">What Travelers Say</h2>
+                <p class="text-xl text-gray-600">Real experiences from our community</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg card-hover scroll-reveal">
+                    <div class="flex items-center mb-4">
+                        <img src="https://images.unsplash.com/photo-1494790108755-2616b2de8a8a?w=60&h=60&fit=crop&crop=face" 
+                             alt="Sarah" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Sarah Johnson</h4>
+                            <div class="flex text-amber-400">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"GlobeTrotter made exploring Rajasthan so easy! The cultural insights and local recommendations were incredible."</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg card-hover scroll-reveal" style="animation-delay: 0.1s;">
+                    <div class="flex items-center mb-4">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face" 
+                             alt="Mike" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Mike Chen</h4>
+                        </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"Perfect for exploring India! The detailed itineraries for Kerala backwaters exceeded my expectations."</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg card-hover scroll-reveal" style="animation-delay: 0.2s;">
+                    <div class="flex items-center mb-4">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face" 
+                             alt="Emma" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Emma Wilson</h4>
+                            <div class="flex text-amber-400">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"Discovered hidden gems across India I never knew existed! From Himachal to Tamil Nadu, amazing experiences."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 hero-gradient relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-blue-800/90"></div>
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="scroll-reveal">
+                <h2 class="text-4xl font-bold text-white mb-6">Ready to Start Your Adventure?</h2>
+                <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                    Join thousands of travelers who trust GlobeTrotter for their journey planning and discovery.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('signup') }}" 
+                       class="inline-flex items-center justify-center px-8 py-4 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition-all hover:scale-105">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create Free Account
+                    </a>
+                    <a href="{{ url_for('login') }}" 
+                       class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-all">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="about" class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-amber-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-globe-americas text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold">GlobeTrotter</span>
+                    </div>
+                    <p class="text-gray-400">
+                        Your trusted companion for exploring the world's most amazing destinations.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Quick Links</h4>
+                    <div class="space-y-2">
+                        <a href="#destinations" class="block text-gray-400 hover:text-white transition-colors">Destinations</a>
+                        <a href="#features" class="block text-gray-400 hover:text-white transition-colors">Features</a>
+                        <a href="{{ url_for('signup') }}" class="block text-gray-400 hover:text-white transition-colors">Sign Up</a>
+                        <a href="{{ url_for('login') }}" class="block text-gray-400 hover:text-white transition-colors">Login</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Support</h4>
+                    <div class="space-y-2">
+                        <a href="#" class="block text-gray-400 hover:text-white transition-colors">Help Center</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition-colors">Contact Us</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center hover:bg-blue-900 transition-colors">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 GlobeTrotter. All rights reserved. Built with ❤️ for travelers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Counter animation
+        const animateCounter = (element, target) => {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target >= 1000000) {
+                    element.textContent = (current / 1000000).toFixed(1) + 'M+';
+                } else if (target >= 1000) {
+                    element.textContent = Math.floor(current / 1000) + 'K+';
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 20);
+        };
+
+        // Start counter animation when stats section is visible
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counters = entry.target.querySelectorAll('.stats-counter');
+                    const targets = [195, 50000, 1000000, 4.9];
+                    
+                    counters.forEach((counter, index) => {
+                        animateCounter(counter, targets[index]);
+                    });
+                    
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const statsSection = document.querySelector('.grid.grid-cols-2.md\\:grid-cols-4');
+        if (statsSection) {
+            statsObserver.observe(statsSection);
+        }
+
+        // Add scroll effect to navbar
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('nav');
+            if (window.scrollY > lastScrollY) {
+                navbar.style.transform = 'translateY(-100%)';
+            } else {
+                navbar.style.transform = 'translateY(0)';
+            }
+            lastScrollY = window.scrollY;
+        });
+    </script>
+</body>
+</html>

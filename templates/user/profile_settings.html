@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Enhanced UX Improvements */
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-50px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .animate-slideInScale {
+            animation: slideInScale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .animate-bounceIn {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Enhanced Card Interactions */
+        .interactive-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .interactive-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .interactive-card:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.25), 
+                        0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Button Styles */
+        /* Button Styles - Fixed sizing with stable click states */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            max-width: 200px;
+            width: auto;
+            height: 44px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:active,
+        .btn-primary:focus {
+            transform: translateY(0px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            outline: none;
+            min-width: 140px;
+            max-width: 200px;
+            width: auto;
+            height: 44px;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 48px;
+            max-width: 60px;
+            width: auto;
+            height: 44px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary:active,
+        .btn-secondary:focus {
+            transform: translateY(0px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            outline: none;
+            min-width: 48px;
+            max-width: 60px;
+            width: auto;
+            height: 44px;
+        }
+        
+        /* Additional button stability rules */
+        .btn-primary *, .btn-secondary * {
+            pointer-events: none; /* Prevent child elements from triggering size changes */
+        }
+        
+        .btn-primary:not(:disabled), .btn-secondary:not(:disabled) {
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Profile Image Styles */
+        .profile-image-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 4px;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background: #10B981;
+            border: 3px solid white;
+            border-radius: 50%;
+        }
+        
+        /* Trip Card Styles */
+        .trip-card {
+            transition: all 0.3s ease;
+        }
+        
+        .trip-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Stats Circle */
+        .stats-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .profile-layout {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .trip-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .profile-image-container {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1F2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+        
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1F2937;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Include Navbar -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Page Header -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- User Info Section -->
+        <section class="interactive-card p-8 mb-8 animate-slideInScale">
+            <div class="profile-layout flex items-center space-x-8">
+                <!-- Profile Image -->
+                <div class="flex-shrink-0">
+                    <div class="profile-image-container">
+                        {% if current_user.profile_picture %}
+                        <img src="{{ url_for('static', filename=current_user.profile_picture) }}" 
+                             alt="User Profile" 
+                             class="profile-image">
+                        {% else %}
+                        <div class="profile-image bg-gray-300 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-600 text-3xl"></i>
+                        </div>
+                        {% endif %}
+                        <div class="status-badge tooltip" data-tooltip="Online"></div>
+                    </div>
+                </div>
+                
+                <!-- User Details -->
+                <div class="flex-grow">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ (current_user.first_name or '') + (' ' + current_user.last_name if current_user.last_name else '') }}</h1>
+                            <p class="text-lg text-gray-600 mb-2">
+                                <i class="fas fa-envelope mr-2 text-indigo-500"></i>
+                                {{ current_user.email }}
+                            </p>
+                            <p class="text-lg text-gray-600 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2 text-indigo-500"></i>
+                                {{ (current_user.city or 'City') + (', ' + current_user.country if current_user.country else '') }}
+                            </p>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <a href="/user/edit-profile" class="btn-primary flex items-center">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit Profile
+                            </a>
+                            <button class="btn-secondary">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Bio -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">About Me</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Passionate traveler exploring the incredible landscapes and rich culture of India. 
+                            Love discovering hidden gems, trying local cuisines, and capturing beautiful moments 
+                            through photography. Always planning the next adventure!
+                        </p>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="stats-grid grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="stats-circle mx-auto mb-2">{{ stats.trips_completed }}</div>
+                            <p class="text-sm text-gray-600">Trips Completed</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="stats-circle mx-auto mb-2">{{ stats.places }}</div>
+                            <p class="text-sm text-gray-600">Places Visited</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="stats-circle mx-auto mb-2">{{ stats.upcoming }}</div>
+                            <p class="text-sm text-gray-600">Upcoming Trips</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="stats-circle mx-auto mb-2">{{ stats.ongoing }}</div>
+                            <p class="text-sm text-gray-600">Ongoing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming/Planned Trips Section -->
+        <section class="mb-12">
+            <div class="flex justify-between items-center mb-6 animate-slideInLeft">
+                <h2 class="text-3xl font-bold text-gray-900">
+                    <i class="fas fa-calendar-plus text-blue-500 mr-3"></i>
+                    Upcoming Trips
+                </h2>
+                <a href="/dashboard/my-trips" class="text-indigo-600 hover:text-indigo-700 font-semibold flex items-center">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="trip-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeInUp">
+                {% for t in trips_upcoming %}
+                <div class="trip-card interactive-card overflow-hidden">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/collection/483251/400x300?sig={{ t.id }}" 
+                             alt="{{ t.title }}" 
+                             class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                {% if t.start_date %}{{ (t.start_date - today).days }} days{% else %}Planned{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t.title }}</h3>
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <i class="fas fa-calendar mr-2"></i>
+                            <span>
+                                {% if t.start_date %}{{ t.start_date.strftime('%b %d, %Y') }}{% endif %}
+                                {% if t.end_date %} - {{ t.end_date.strftime('%b %d, %Y') }}{% endif %}
+                            </span>
+                        </div>
+                        <a href="{{ url_for('itinerary', trip_id=t.id) }}" class="btn-primary w-full text-center block">View Details</a>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500">No upcoming trips yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Previous Trips Section -->
+        <section class="mb-12">
+            <div class="flex justify-between items-center mb-6 animate-slideInLeft">
+                <h2 class="text-3xl font-bold text-gray-900">
+                    <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                    Previous Trips
+                </h2>
+                <a href="/dashboard/my-trips" class="text-indigo-600 hover:text-indigo-700 font-semibold flex items-center">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="trip-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeInUp">
+                {% for t in trips_completed %}
+                <div class="trip-card interactive-card overflow-hidden">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/collection/190727/400x300?sig={{ t.id }}" 
+                             alt="{{ t.title }}" 
+                             class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                Completed
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t.title }}</h3>
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <i class="fas fa-calendar mr-2"></i>
+                            <span>
+                                {% if t.start_date %}{{ t.start_date.strftime('%b %d, %Y') }}{% endif %}
+                                {% if t.end_date %} - {{ t.end_date.strftime('%b %d, %Y') }}{% endif %}
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="{{ url_for('itinerary', trip_id=t.id) }}" class="btn-secondary flex-1 text-center">View Itinerary</a>
+                            <button class="btn-secondary">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500">No completed trips yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript for Enhanced Interactions -->
+    <script>
+        // Enhanced card interactions
+        document.querySelectorAll('.interactive-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Trip card hover effects
+        document.querySelectorAll('.trip-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+                this.style.boxShadow = '0 15px 40px -12px rgba(0, 0, 0, 0.25)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '';
+            });
+        });
+
+        // Button click prevention of size changes
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Prevent any size changes by maintaining fixed dimensions
+                const currentWidth = this.offsetWidth;
+                const currentHeight = this.offsetHeight;
+                
+                // Lock the dimensions temporarily
+                this.style.width = currentWidth + 'px';
+                this.style.height = currentHeight + 'px';
+                
+                // Restore auto sizing after transition
+                setTimeout(() => {
+                    this.style.width = 'auto';
+                    this.style.height = '44px'; // Fixed height
+                }, 100);
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all trip cards for scroll animation
+        document.querySelectorAll('.trip-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Profile dropdown functionality
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdown');
+            const profileButton = event.target.closest('button');
+            
+            if (!profileButton || !profileButton.onclick) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

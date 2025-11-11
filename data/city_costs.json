@@ -1,0 +1,84 @@
+{
+    "cost_indices": {
+        "europe": {
+            "western": {
+                "Paris": {"cost_index": "High", "relative_value": 85},
+                "London": {"cost_index": "Very High", "relative_value": 90},
+                "Amsterdam": {"cost_index": "High", "relative_value": 80},
+                "Berlin": {"cost_index": "Medium", "relative_value": 65},
+                "Rome": {"cost_index": "Medium", "relative_value": 70}
+            },
+            "eastern": {
+                "Prague": {"cost_index": "Medium", "relative_value": 55},
+                "Budapest": {"cost_index": "Low", "relative_value": 45},
+                "Warsaw": {"cost_index": "Low", "relative_value": 50},
+                "Krakow": {"cost_index": "Low", "relative_value": 45}
+            }
+        },
+        "asia": {
+            "east": {
+                "Tokyo": {"cost_index": "Very High", "relative_value": 95},
+                "Seoul": {"cost_index": "High", "relative_value": 75},
+                "Shanghai": {"cost_index": "High", "relative_value": 70},
+                "Hong Kong": {"cost_index": "Very High", "relative_value": 100}
+            },
+            "southeast": {
+                "Bangkok": {"cost_index": "Low", "relative_value": 40},
+                "Singapore": {"cost_index": "Very High", "relative_value": 90},
+                "Kuala Lumpur": {"cost_index": "Low", "relative_value": 35},
+                "Jakarta": {"cost_index": "Low", "relative_value": 30}
+            },
+            "south": {
+                "Mumbai": {"cost_index": "Low", "relative_value": 35},
+                "Delhi": {"cost_index": "Low", "relative_value": 30},
+                "Bangalore": {"cost_index": "Low", "relative_value": 35},
+                "Chennai": {"cost_index": "Low", "relative_value": 30}
+            }
+        },
+        "north_america": {
+            "usa": {
+                "New York": {"cost_index": "Very High", "relative_value": 100},
+                "San Francisco": {"cost_index": "Very High", "relative_value": 95},
+                "Chicago": {"cost_index": "High", "relative_value": 75},
+                "Los Angeles": {"cost_index": "High", "relative_value": 85}
+            },
+            "canada": {
+                "Toronto": {"cost_index": "High", "relative_value": 75},
+                "Vancouver": {"cost_index": "High", "relative_value": 80},
+                "Montreal": {"cost_index": "Medium", "relative_value": 65}
+            }
+        },
+        "australia": {
+            "Sydney": {"cost_index": "Very High", "relative_value": 85},
+            "Melbourne": {"cost_index": "High", "relative_value": 80},
+            "Brisbane": {"cost_index": "High", "relative_value": 75},
+            "Perth": {"cost_index": "High", "relative_value": 70}
+        }
+    },
+    "relative_costs": {
+        "Very High": {
+            "hotel": {"budget": 200, "mid": 350, "luxury": 600},
+            "meal": {"budget": 20, "mid": 40, "luxury": 100},
+            "transport": {"budget": 10, "mid": 25, "luxury": 60},
+            "activities": {"budget": 30, "mid": 60, "luxury": 150}
+        },
+        "High": {
+            "hotel": {"budget": 150, "mid": 250, "luxury": 450},
+            "meal": {"budget": 15, "mid": 30, "luxury": 80},
+            "transport": {"budget": 8, "mid": 20, "luxury": 50},
+            "activities": {"budget": 25, "mid": 50, "luxury": 120}
+        },
+        "Medium": {
+            "hotel": {"budget": 100, "mid": 180, "luxury": 350},
+            "meal": {"budget": 10, "mid": 25, "luxury": 60},
+            "transport": {"budget": 5, "mid": 15, "luxury": 40},
+            "activities": {"budget": 20, "mid": 40, "luxury": 100}
+        },
+        "Low": {
+            "hotel": {"budget": 50, "mid": 100, "luxury": 200},
+            "meal": {"budget": 5, "mid": 15, "luxury": 40},
+            "transport": {"budget": 3, "mid": 10, "luxury": 30},
+            "activities": {"budget": 15, "mid": 30, "luxury": 80}
+        }
+    }
+}

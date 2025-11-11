@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan New Trip - GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Enhanced UX Improvements */
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-50px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .animate-slideInScale {
+            animation: slideInScale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .animate-bounceIn {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.8s ease-out;
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .ripple-effect:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Enhanced Card Interactions */
+        .interactive-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .interactive-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .interactive-card:hover::after {
+            transform: rotate(45deg) translateX(100%);
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-12px) rotateY(5deg);
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.25), 
+                        0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Improved Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Ripple animation for buttons/chips */
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 0.6; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        .ripple { position: absolute; border-radius: 50%; transform: scale(0); animation: ripple 0.6s linear; background: rgba(255,255,255,0.6); pointer-events: none; }
+        
+        /* Form Styles */
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            color: #374151;
+        }
+        
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 1);
+            outline: none;
+        }
+        
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .tag-beach {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+        
+        .tag-city {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .tag-adventure {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: white;
+        }
+        
+        .tag-culture {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+        
+        .tag-nature {
+            background: linear-gradient(135deg, #00b894, #55a3ff);
+            color: white;
+        }
+        
+        /* Banner Overlay */
+        .banner-overlay {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+        }
+        
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .tooltip:hover::before,
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .banner-overlay h1 {
+                font-size: 2.5rem;
+            }
+            
+            .interactive-card {
+                min-width: 250px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .banner-overlay h1 {
+                font-size: 2rem;
+            }
+            
+            .interactive-card {
+                min-width: 100%;
+            }
+        }
+        
+        /* Select dropdown styling */
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 3rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Include standardized navbar -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Page Title Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 animate-fadeInUp">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Plan a New Trip</h1>
+            <p class="text-xl text-gray-600">Create your perfect Indian adventure</p>
+        </div>
+    </section>
+
+    <!-- Trip Planning Form -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 animate-slideInScale" style="animation-delay: 0.2s;">
+        <div class="glass-effect rounded-2xl shadow-lg p-8 mb-12">
+            <form id="tripForm" class="space-y-6" method="post" action="/dashboard/create-trip">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Trip Type Selection -->
+                    <div class="md:col-span-2 mb-6">
+                        <label class="form-label">Trip Type</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="tripType" value="adventure" class="hidden">
+                                <div class="p-4 rounded-xl border-2 border-transparent group-hover:border-indigo-200 text-center transition-all duration-300 trip-type-card">
+                                    <i class="fas fa-hiking text-3xl mb-2 text-indigo-500"></i>
+                                    <div class="font-medium">Adventure</div>
+                                    <div class="text-sm text-gray-500">Thrilling experiences</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="tripType" value="culture" class="hidden">
+                                <div class="p-4 rounded-xl border-2 border-transparent group-hover:border-indigo-200 text-center transition-all duration-300 trip-type-card">
+                                    <i class="fas fa-landmark text-3xl mb-2 text-indigo-500"></i>
+                                    <div class="font-medium">Cultural</div>
+                                    <div class="text-sm text-gray-500">Heritage & traditions</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="tripType" value="relaxation" class="hidden">
+                                <div class="p-4 rounded-xl border-2 border-transparent group-hover:border-indigo-200 text-center transition-all duration-300 trip-type-card">
+                                    <i class="fas fa-umbrella-beach text-3xl mb-2 text-indigo-500"></i>
+                                    <div class="font-medium">Relaxation</div>
+                                    <div class="text-sm text-gray-500">Peaceful getaway</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" name="tripType" value="nature" class="hidden">
+                                <div class="p-4 rounded-xl border-2 border-transparent group-hover:border-indigo-200 text-center transition-all duration-300 trip-type-card">
+                                    <i class="fas fa-mountain text-3xl mb-2 text-indigo-500"></i>
+                                    <div class="font-medium">Nature</div>
+                                    <div class="text-sm text-gray-500">Scenic beauty</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Trip Name with Smart Suggestions -->
+                    <div class="md:col-span-2">
+                        <label for="tripName" class="form-label">Trip Name</label>
+                        <div class="relative">
+                            <input type="text" id="tripName" name="tripName" class="form-input pr-10" placeholder="e.g., Royal Rajasthan Adventure" required>
+                            <button type="button" id="suggestName" class="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-600" title="Get name suggestions">
+                                <i class="fas fa-magic"></i>
+                            </button>
+                        </div>
+                        <div id="nameSuggestions" class="hidden mt-2 p-2 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Smart Date Selection -->
+                    <div>
+                        <label for="startDate" class="form-label flex items-center justify-between">
+                            <span>Start Date</span>
+                            <div class="weather-preview text-sm text-gray-500"></div>
+                        </label>
+                        <input type="date" id="startDate" name="startDate" class="form-input" required>
+                        <div class="mt-2">
+                            <div class="text-sm text-gray-500 season-info hidden">
+                                <!-- Season info will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Duration Selection -->
+                    <div>
+                        <label for="endDate" class="form-label flex items-center justify-between">
+                            <span>End Date</span>
+                            <div class="duration-display text-sm font-medium text-indigo-600"></div>
+                        </label>
+                        <input type="date" id="endDate" name="endDate" class="form-input" required>
+                        <div class="mt-2">
+                            <div class="flex gap-2 duration-quick-picks">
+                                <button type="button" class="px-2 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100" data-days="3">Weekend</button>
+                                <button type="button" class="px-2 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100" data-days="7">Week</button>
+                                <button type="button" class="px-2 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100" data-days="14">2 Weeks</button>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <p id="budget-hint" class="text-sm text-indigo-600"></p>
+                            <p id="budget-server" class="text-sm text-gray-600 mt-1"></p>
+                        </div>
+                    </div>
+
+                    <!-- Smart Destination Selection with Map & Weather -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">Destinations</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Destination Input & Tags -->
+                            <div class="md:col-span-1">
+                                <div class="glass-effect p-4 rounded-xl">
+                                    <div id="destination-select" class="form-input flex flex-wrap gap-2 items-center cursor-text mb-3" tabindex="0">
+                                        <input id="dest-input" type="text" 
+                                            class="flex-1 min-w-40 outline-none bg-transparent" 
+                                            placeholder="Type a city name..."
+                                            autocomplete="off" />
+                                    </div>
+                                    <!-- Hidden container for form posting -->
+                                    <div id="dest-hidden" class="hidden"></div>
+                                    
+                                    <!-- Destination Autocomplete Results -->
+                                    <div id="dest-autocomplete" class="hidden mt-2 bg-white rounded-lg shadow-lg max-h-48 overflow-y-auto divide-y divide-gray-100">
+                                        <!-- Results populated by JavaScript -->
+                                    </div>
+                                    
+                                    <!-- Selected Destinations -->
+                                    <div id="selected-destinations" class="mt-4">
+                                        <h4 class="text-sm font-medium text-gray-700 mb-2">Selected Destinations</h4>
+                                        <div class="space-y-2">
+                                            <!-- Populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Popular Destinations -->
+                                    <div class="mt-4">
+                                        <h4 class="text-sm font-medium text-gray-700 mb-2">Popular Destinations</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            <button type="button" class="destination-chip" data-city="Jaipur" data-lat="26.9124" data-lng="75.7873">
+                                                <i class="fas fa-map-marker-alt mr-1"></i> Jaipur
+                                            </button>
+                                            <button type="button" class="destination-chip" data-city="Goa" data-lat="15.2993" data-lng="74.1240">
+                                                <i class="fas fa-map-marker-alt mr-1"></i> Goa
+                                            </button>
+                                            <button type="button" class="destination-chip" data-city="Udaipur" data-lat="24.5854" data-lng="73.7125">
+                                                <i class="fas fa-map-marker-alt mr-1"></i> Udaipur
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Map Preview -->
+                            <div class="md:col-span-2">
+                                <div class="glass-effect rounded-xl overflow-hidden" style="height: 400px;">
+                                    <div id="map" class="w-full h-full"></div>
+                                </div>
+                                <!-- Route Information -->
+                                <div id="route-info" class="mt-4 p-4 bg-white rounded-xl shadow-sm hidden">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Route Overview</h4>
+                                            <p class="text-sm text-gray-600 total-distance"></p>
+                                        </div>
+                                        <button type="button" class="optimize-route-btn px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors">
+                                            <i class="fas fa-magic mr-2"></i>
+                                            Optimize Route
+                                        </button>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="text-sm text-gray-600 route-stops"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trip Description -->
+                    <style>
+                        .destination-chip {
+                            padding: 0.75rem 1rem;
+                            font-size: 0.875rem;
+                            background-color: white;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 9999px;
+                            transition: all 0.3s ease;
+                        }
+                        .destination-chip:hover {
+                            border-color: #a5b4fc;
+                            background-color: #eef2ff;
+                        }
+                        #dest-autocomplete:not(.hidden) {
+                            position: absolute;
+                            z-index: 10;
+                            left: 0;
+                            right: 0;
+                            margin-top: 0.25rem;
+                        }
+                        .autocomplete-item {
+                            padding: 0.5rem 1rem;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                        }
+                        .autocomplete-item:hover {
+                            background-color: #f9fafb;
+                        }
+                        .autocomplete-item i {
+                            margin-right: 0.5rem;
+                            color: #6366f1;
+                        }
+                        .selected-destination-card {
+                            padding: 0.75rem;
+                            background-color: white;
+                            border-radius: 0.5rem;
+                            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                        }
+                        .selected-destination-card .weather {
+                            font-size: 0.875rem;
+                            color: #4b5563;
+                            display: flex;
+                            align-items: center;
+                        }
+                        .selected-destination-card .remove-btn {
+                            padding: 0.25rem;
+                            color: #9ca3af;
+                            transition: color 0.3s ease;
+                        }
+                        .selected-destination-card .remove-btn:hover {
+                            color: #ef4444;
+                        }
+                        .trip-type-card.selected {
+                            border-color: #6366f1;
+                            background-color: #eef2ff;
+                        }
+                    </style>
+                    
+                    <!-- Add Map and Weather APIs -->
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA&libraries=places"></script>
+                    <script>
+                        // Trip Type Selection
+                        document.querySelectorAll('input[name="tripType"]').forEach(input => {
+                            input.addEventListener('change', () => {
+                                document.querySelectorAll('.trip-type-card').forEach(card => {
+                                    card.classList.remove('selected');
+                                });
+                                if (input.checked) {
+                                    input.parentElement.querySelector('.trip-type-card').classList.add('selected');
+                                    suggestTripName();
+                                }
+                            });
+                        });
+
+                        // Smart Name Suggestions
+                        function suggestTripName() {
+                            const tripType = document.querySelector('input[name="tripType"]:checked')?.value;
+                            const destinations = Array.from(document.querySelectorAll('#dest-hidden input')).map(i => i.value);
+                            
+                            if (!tripType || !destinations.length) return;
+
+                            const adjectives = {
+                                adventure: ['Epic', 'Thrilling', 'Exciting'],
+                                culture: ['Cultural', 'Heritage', 'Traditional'],
+                                relaxation: ['Peaceful', 'Serene', 'Blissful'],
+                                nature: ['Natural', 'Wild', 'Scenic']
+                            };
+
+                            const suggestions = adjectives[tripType].map(adj => 
+                                `${adj} ${destinations.length > 1 ? 'Indian Journey' : destinations[0]} ${tripType === 'adventure' ? 'Adventure' : 'Experience'}`
+                            );
+
+                            const suggestionDiv = document.getElementById('nameSuggestions');
+                            suggestionDiv.innerHTML = suggestions.map(s => 
+                                `<div class="p-2 hover:bg-gray-50 cursor-pointer" onclick="selectName('${s}')">${s}</div>`
+                            ).join('');
+                            suggestionDiv.classList.remove('hidden');
+                        }
+
+                        function selectName(name) {
+                            document.getElementById('tripName').value = name;
+                            document.getElementById('nameSuggestions').classList.add('hidden');
+                        }
+
+                        document.getElementById('suggestName').addEventListener('click', suggestTripName);
+
+                        // Date and Duration Handling
+                        function updateDuration() {
+                            const start = new Date(document.getElementById('startDate').value);
+                            const end = new Date(document.getElementById('endDate').value);
+                            if (!isNaN(start) && !isNaN(end)) {
+                                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                                document.querySelector('.duration-display').textContent = `${days} days`;
+                                updateSeasonInfo(start);
+                            }
+                        }
+
+                        function updateSeasonInfo(date) {
+                            const month = date.getMonth();
+                            let season;
+                            if (month >= 2 && month <= 5) season = 'Summer';
+                            else if (month >= 6 && month <= 9) season = 'Monsoon';
+                            else season = 'Winter';
+
+                            const info = document.querySelector('.season-info');
+                            info.innerHTML = `<i class="fas ${season === 'Summer' ? 'fa-sun' : season === 'Monsoon' ? 'fa-cloud-rain' : 'fa-snowflake'} mr-2"></i>${season} season`;
+                            info.classList.remove('hidden');
+                        }
+
+                        document.querySelectorAll('.duration-quick-picks button').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                const days = parseInt(btn.dataset.days);
+                                const start = new Date(document.getElementById('startDate').value);
+                                if (!isNaN(start)) {
+                                    const end = new Date(start);
+                                    end.setDate(start.getDate() + days - 1);
+                                    document.getElementById('endDate').value = end.toISOString().split('T')[0];
+                                    updateDuration();
+                                }
+                            });
+                        });
+
+                        document.getElementById('startDate').addEventListener('change', updateDuration);
+                        document.getElementById('endDate').addEventListener('change', updateDuration);
+
+                        // Map Integration
+                        let map, markers = [], directionsService, directionsRenderer;
+
+                        function initMap() {
+                            map = new google.maps.Map(document.getElementById('map'), {
+                                center: { lat: 20.5937, lng: 78.9629 }, // Center of India
+                                zoom: 5
+                            });
+
+                            directionsService = new google.maps.DirectionsService();
+                            directionsRenderer = new google.maps.DirectionsRenderer({
+                                map: map,
+                                suppressMarkers: true
+                            });
+
+                            // Initialize Places Autocomplete
+                            const input = document.getElementById('dest-input');
+                            const autocomplete = new google.maps.places.Autocomplete(input, {
+                                types: ['(cities)'],
+                                componentRestrictions: { country: 'IN' }
+                            });
+
+                            autocomplete.addListener('place_changed', () => {
+                                const place = autocomplete.getPlace();
+                                if (place.geometry) {
+                                    addDestination({
+                                        name: place.name,
+                                        lat: place.geometry.location.lat(),
+                                        lng: place.geometry.location.lng()
+                                    });
+                                }
+                            });
+                        }
+
+                        function addDestination(destination) {
+                            // Add marker
+                            const marker = new google.maps.Marker({
+                                position: { lat: destination.lat, lng: destination.lng },
+                                map: map,
+                                title: destination.name
+                            });
+                            markers.push(marker);
+
+                            // Add to hidden input
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'destinations[]';
+                            input.value = destination.name;
+                            document.getElementById('dest-hidden').appendChild(input);
+
+                            // Update route if multiple destinations
+                            if (markers.length > 1) {
+                                calculateAndDisplayRoute();
+                            }
+
+                            // Fetch weather
+                            fetchWeather(destination);
+                        }
+
+                        async function fetchWeather(destination) {
+                            try {
+                                const response = await fetch(`/api/weather?lat=${destination.lat}&lng=${destination.lng}`);
+                                const data = await response.json();
+                                
+                                // Add destination card with weather
+                                const card = document.createElement('div');
+                                card.className = 'selected-destination-card mb-2';
+                                card.innerHTML = `
+                                    <div>
+                                        <div class="font-medium">${destination.name}</div>
+                                        <div class="weather">
+                                            <i class="fas ${getWeatherIcon(data.weather)} mr-1"></i>
+                                            ${Math.round(data.temp)}°C
+                                        </div>
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeDestination('${destination.name}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                `;
+                                document.getElementById('selected-destinations').appendChild(card);
+                            } catch (error) {
+                                console.error('Error fetching weather:', error);
+                            }
+                        }
+
+                        function getWeatherIcon(weather) {
+                            const icons = {
+                                'Clear': 'fa-sun',
+                                'Clouds': 'fa-cloud',
+                                'Rain': 'fa-cloud-rain',
+                                'Snow': 'fa-snowflake',
+                                'Default': 'fa-cloud'
+                            };
+                            return icons[weather] || icons.Default;
+                        }
+
+                        function removeDestination(name) {
+                            // Remove marker
+                            const index = markers.findIndex(m => m.title === name);
+                            if (index > -1) {
+                                markers[index].setMap(null);
+                                markers.splice(index, 1);
+                            }
+
+                            // Remove from hidden inputs
+                            const inputs = document.querySelectorAll('#dest-hidden input');
+                            inputs.forEach(input => {
+                                if (input.value === name) input.remove();
+                            });
+
+                            // Remove card
+                            const cards = document.querySelectorAll('.selected-destination-card');
+                            cards.forEach(card => {
+                                if (card.querySelector('.font-medium').textContent === name) {
+                                    card.remove();
+                                }
+                            });
+
+                            // Update route
+                            if (markers.length > 1) {
+                                calculateAndDisplayRoute();
+                            } else {
+                                directionsRenderer.setDirections({ routes: [] });
+                                document.getElementById('route-info').classList.add('hidden');
+                            }
+                        }
+
+                        function calculateAndDisplayRoute() {
+                            if (markers.length < 2) return;
+
+                            const waypoints = markers.slice(1, -1).map(marker => ({
+                                location: marker.getPosition(),
+                                stopover: true
+                            }));
+
+                            directionsService.route({
+                                origin: markers[0].getPosition(),
+                                destination: markers[markers.length - 1].getPosition(),
+                                waypoints: waypoints,
+                                optimizeWaypoints: false,
+                                travelMode: 'DRIVING'
+                            }, (response, status) => {
+                                if (status === 'OK') {
+                                    directionsRenderer.setDirections(response);
+                                    updateRouteInfo(response);
+                                }
+                            });
+                        }
+
+                        function updateRouteInfo(response) {
+                            const route = response.routes[0];
+                            const routeInfo = document.getElementById('route-info');
+                            
+                            let totalDistance = 0;
+                            let totalDuration = 0;
+                            
+                            route.legs.forEach(leg => {
+                                totalDistance += leg.distance.value;
+                                totalDuration += leg.duration.value;
+                            });
+
+                            document.querySelector('.total-distance').textContent = 
+                                `Total distance: ${Math.round(totalDistance/1000)}km (${Math.round(totalDuration/3600)} hours)`;
+
+                            const stops = markers.map(m => m.title).join(' → ');
+                            document.querySelector('.route-stops').textContent = stops;
+
+                            routeInfo.classList.remove('hidden');
+                        }
+
+                        document.querySelector('.optimize-route-btn').addEventListener('click', () => {
+                            if (markers.length < 2) return;
+                            
+                            directionsService.route({
+                                origin: markers[0].getPosition(),
+                                destination: markers[markers.length - 1].getPosition(),
+                                waypoints: markers.slice(1, -1).map(marker => ({
+                                    location: marker.getPosition(),
+                                    stopover: true
+                                })),
+                                optimizeWaypoints: true,
+                                travelMode: 'DRIVING'
+                            }, (response, status) => {
+                                if (status === 'OK') {
+                                    directionsRenderer.setDirections(response);
+                                    updateRouteInfo(response);
+                                    
+                                    // Update markers array order based on optimization
+                                    const order = response.routes[0].waypoint_order;
+                                    const newMarkers = [markers[0]];
+                                    order.forEach(index => newMarkers.push(markers[index + 1]));
+                                    newMarkers.push(markers[markers.length - 1]);
+                                    markers = newMarkers;
+                                }
+                            });
+                        });
+
+                        // Initialize map when page loads
+                        window.addEventListener('load', initMap);
+                    </script>
+                    <div class="md:col-span-2">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <textarea id="description" name="description" rows="4" class="form-input" placeholder="Tell us about your dream trip..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                    <button type="submit" class="btn-primary ripple-effect flex-1 sm:flex-none">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Trip
+                    </button>
+                    <button type="button" class="btn-secondary flex-1 sm:flex-none" onclick="window.location.href='/dashboard'">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Dashboard
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Suggestions Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20 animate-fadeInUp" style="animation-delay: 0.4s;">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Suggestions for Places & Activities</h2>
+            <p class="text-lg text-gray-600">Discover amazing destinations and experiences in India</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Suggestion Card 1 -->
+            <div class="interactive-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=400&q=80" 
+                         alt="Taj Mahal, Agra" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="tag tag-culture">Culture</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <button class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors tooltip" data-tooltip="Add to wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <button class="w-full bg-indigo-600/90 backdrop-blur-sm text-white py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-indigo-700 font-semibold">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Taj Mahal</h3>
+                    <p class="text-gray-600 flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt mr-1 text-indigo-500"></i>
+                        Agra, Uttar Pradesh
+                    </p>
+                    <p class="text-gray-500 text-sm">Experience the eternal symbol of love and marvel at Mughal architecture</p>
+                </div>
+            </div>
+
+            <!-- Suggestion Card 2 -->
+            <div class="interactive-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80" 
+                         alt="Kerala Backwaters" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="tag tag-nature">Nature</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <button class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors tooltip" data-tooltip="Add to wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <button class="w-full bg-indigo-600/90 backdrop-blur-sm text-white py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-indigo-700 font-semibold">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Kerala Backwaters</h3>
+                    <p class="text-gray-600 flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt mr-1 text-indigo-500"></i>
+                        Alleppey, Kerala
+                    </p>
+                    <p class="text-gray-500 text-sm">Cruise through serene waterways and experience traditional houseboat living</p>
+                </div>
+            </div>
+
+            <!-- Suggestion Card 3 -->
+            <div class="interactive-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&q=80" 
+                         alt="Goa Beach" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="tag tag-beach">Beach</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <button class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors tooltip" data-tooltip="Add to wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <button class="w-full bg-indigo-600/90 backdrop-blur-sm text-white py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-indigo-700 font-semibold">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Goa Beaches</h3>
+                    <p class="text-gray-600 flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt mr-1 text-indigo-500"></i>
+                        Goa
+                    </p>
+                    <p class="text-gray-500 text-sm">Golden beaches, vibrant nightlife, and Portuguese colonial heritage</p>
+                </div>
+            </div>
+
+            <!-- Suggestion Card 4 -->
+            <div class="interactive-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=400&q=80" 
+                         alt="Jaipur Palace" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="tag tag-city">City</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <button class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors tooltip" data-tooltip="Add to wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <button class="w-full bg-indigo-600/90 backdrop-blur-sm text-white py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-indigo-700 font-semibold">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Jaipur City Palace</h3>
+                    <p class="text-gray-600 flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt mr-1 text-indigo-500"></i>
+                        Jaipur, Rajasthan
+                    </p>
+                    <p class="text-gray-500 text-sm">Explore the Pink City and magnificent royal palaces of Rajasthan</p>
+                </div>
+            </div>
+
+            <!-- Suggestion Card 5 -->
+            <div class="interactive-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1571115764595-644a1f56a55c?auto=format&fit=crop&w=400&q=80" 
+                         alt="Kashmir Valley" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="tag tag-adventure">Adventure</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <button class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors tooltip" data-tooltip="Add to wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <button class="w-full bg-indigo-600/90 backdrop-blur-sm text-white py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-indigo-700 font-semibold">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Kashmir Valley</h3>
+                    <p class="text-gray-600 flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt mr-1 text-indigo-500"></i>
+                        Srinagar, Kashmir
+                    </p>
+                    <p class="text-gray-500 text-sm">Paradise on Earth with snow-capped mountains and pristine lakes</p>
+                </div>
+            </div>
+
+            <!-- Suggestion Card 6 -->
+            <div class="interactive-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=400&q=80" 
+                         alt="Rishikesh Adventure" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="tag tag-adventure">Adventure</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <button class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors tooltip" data-tooltip="Add to wishlist">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <button class="w-full bg-indigo-600/90 backdrop-blur-sm text-white py-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-indigo-700 font-semibold">
+                            <i class="fas fa-plus mr-2"></i>Add to Trip
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Rishikesh</h3>
+                    <p class="text-gray-600 flex items-center mb-2">
+                        <i class="fas fa-map-marker-alt mr-1 text-indigo-500"></i>
+                        Rishikesh, Uttarakhand
+                    </p>
+                    <p class="text-gray-500 text-sm">Yoga capital of the world with river rafting and spiritual experiences</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Budget Breakdown Modal -->
+    <div id="budgetBreakdownModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Budget Breakdown</h3>
+                <button onclick="closeBudgetBreakdown()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="budgetBreakdownContent" class="space-y-4">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+            <div class="mt-6 text-center">
+                <button onclick="closeBudgetBreakdown()" 
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function showBudgetBreakdown(breakdown) {
+            const modal = document.getElementById('budgetBreakdownModal');
+            const content = document.getElementById('budgetBreakdownContent');
+            
+            // Get seasonal adjustment factor
+            const seasonalFactor = breakdown.seasonal_factor === 'peak' ? '+30%' : 
+                                 breakdown.seasonal_factor === 'off' ? '-20%' : '0%';
+            
+            // Create content
+            content.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">Base daily cost</span>
+                        <span class="font-medium">₹${breakdown.base_daily_cost.toLocaleString('en-IN')}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">Number of days</span>
+                        <span class="font-medium">× ${breakdown.duration_days}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="text-gray-600">Season adjustment</span>
+                            <div class="text-sm text-gray-500">${breakdown.seasonal_factor} season</div>
+                        </div>
+                        <span class="font-medium">${seasonalFactor}</span>
+                    </div>
+                    
+                    ${breakdown.multi_city_factor > 1 ? `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div>
+                                <span class="text-gray-600">Multi-city factor</span>
+                                <div class="text-sm text-gray-500">Transportation between cities</div>
+                            </div>
+                            <span class="font-medium">+20%</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="text-sm text-gray-500 mt-4">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Estimates are based on real-time data including:
+                        <ul class="list-disc ml-5 mt-2">
+                            <li>Current GDP per capita</li>
+                            <li>City-specific cost factors</li>
+                            <li>Seasonal variations</li>
+                            <li>Live currency exchange rates</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        function closeBudgetBreakdown() {
+            document.getElementById('budgetBreakdownModal').style.display = 'none';
+        }
+    </script>
+    <script>
+        // Notifications dropdown and fetch
+        (function(){
+            const notifBtn = document.getElementById('notifBtn');
+            const notifMenu = document.getElementById('notifMenu');
+            const notifList = document.getElementById('notifList');
+            const markAllRead = document.getElementById('markAllRead');
+            if (notifBtn) {
+                notifBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    notifMenu.classList.toggle('hidden');
+                    if (!notifMenu.classList.contains('hidden')) {
+                        try {
+                            const res = await fetch('/api/notifications');
+                            const data = await res.json();
+                            notifList.innerHTML = '';
+                            if (data.ok && data.items.length) {
+                                data.items.forEach(n => {
+                                    const row = document.createElement('div');
+                                    row.className = 'p-3 hover:bg-gray-50';
+                                    row.innerHTML = `<div class="text-sm ${n.is_read ? 'text-gray-600' : 'text-gray-900 font-medium'}">${n.message}</div>
+                                                      <div class="text-xs text-gray-400 mt-1">${new Date(n.created_at).toLocaleString()}</div>`;
+                                    notifList.appendChild(row);
+                                });
+                            } else {
+                                notifList.innerHTML = '<div class="p-3 text-sm text-gray-500">No notifications</div>';
+                            }
+                        } catch (err) {
+                            notifList.innerHTML = '<div class="p-3 text-sm text-gray-500">Failed to load</div>';
+                        }
+                    }
+                });
+                document.addEventListener('click', (e) => {
+                    if (!notifMenu.contains(e.target) && e.target !== notifBtn) {
+                        notifMenu.classList.add('hidden');
+                    }
+                });
+            }
+            if (markAllRead) {
+                markAllRead.addEventListener('click', async () => {
+                    try { await fetch('/api/notifications/mark-read', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ids: []})}); } catch {}
+                    notifMenu.classList.add('hidden');
+                    const badge = notifBtn?.querySelector('span');
+                    if (badge) badge.remove();
+                });
+            }
+        })();
+
+        // Lightweight budget/duration suggestion algorithm
+        function daysBetween(a, b){
+            const ms = (new Date(b) - new Date(a));
+            return isNaN(ms) ? 0 : Math.floor(ms/86400000)+1;
+        }
+
+        // Optional: client-side validation enhancement
+        document.getElementById('tripForm').addEventListener('submit', function(e) {
+            const startDate = new Date(this.startDate.value);
+            const endDate = new Date(this.endDate.value);
+            const today = new Date();
+            // Basic checks; allow server to decide finally
+            if (this.tripName.value.trim() === '') {
+                e.preventDefault();
+                alert('Trip name is required');
+                return;
+            }
+            if (this.startDate.value && startDate < new Date(today.toDateString())) {
+                e.preventDefault();
+                alert('Start date cannot be in the past');
+                return;
+            }
+            if (this.endDate.value && this.startDate.value && endDate <= startDate) {
+                e.preventDefault();
+                alert('End date must be after start date');
+                return;
+            }
+            // Ensure at least one destination tag exists
+            const hidden = document.getElementById('dest-hidden');
+            if (hidden.querySelectorAll('input[name="destinations[]"]').length === 0) {
+                e.preventDefault();
+                alert('Add at least one destination');
+                return;
+            }
+        });
+        
+        // Enhanced intersection observer with staggered animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.animationPlayState = 'running';
+                        entry.target.style.opacity = '1';
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.animate-fadeInUp, .animate-slideInLeft, .animate-slideInRight, .animate-slideInScale').forEach((el, index) => {
+            el.style.animationPlayState = 'paused';
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
+
+        // Enhanced button interactions
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Card hover interactions
+        document.querySelectorAll('.interactive-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = card.style.transform + ' scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = card.style.transform.replace(' scale(1.02)', '');
+            });
+        });
+
+        // Initialize animations on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.animate-slideInLeft, .animate-slideInRight').forEach(el => {
+                el.style.animationPlayState = 'running';
+                el.style.opacity = '1';
+            });
+            // Pre-fill minimum end date and budget hint
+            const sd = document.getElementById('startDate');
+            const ed = document.getElementById('endDate');
+            const recalc = async () => {
+                if (sd.value) { ed.min = sd.value; }
+                const d = daysBetween(sd.value, ed.value);
+                const destTags = Array.from(document.querySelectorAll('#dest-hidden input[name="destinations[]"]')).map(i=>i.value);
+                const hint = document.getElementById('budget-hint');
+                const serverHint = document.getElementById('budget-server');
+
+                if (d > 0 && destTags.length > 0) {
+                    // Show loading state
+                    hint.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i>Calculating budget...';
+                    serverHint.textContent = '';
+
+                    // Get real-time budget estimate
+                    fetch(`/api/budget/estimate?days=${d}&destinations=${encodeURIComponent(destTags.join(','))}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.ok) {
+                                // Format the budget estimate
+                                hint.innerHTML = `
+                                    <div class="flex items-center justify-between">
+                                        <span>Estimated budget: <strong>₹${data.estimate_inr.toLocaleString('en-IN')}</strong></span>
+                                        <button type="button" class="text-indigo-600 hover:text-indigo-800" 
+                                                onclick="showBudgetBreakdown(${JSON.stringify(data.breakdown)})">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                    </div>
+                                `;
+                                
+                                // Show per-day breakdown
+                                serverHint.innerHTML = `
+                                    <div class="text-gray-600">
+                                        <i class="fas fa-calculator mr-1"></i>
+                                        ₹${data.per_day_inr.toLocaleString('en-IN')} per day
+                                        ${data.cities_found.length < destTags.length ? 
+                                            '<br><small class="text-yellow-600"><i class="fas fa-exclamation-triangle mr-1"></i>Some cities not found, using averages</small>' 
+                                            : ''}
+                                    </div>
+                                `;
+                            } else {
+                                hint.textContent = 'Could not estimate budget';
+                                serverHint.textContent = '';
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Budget estimation error:', err);
+                            hint.textContent = 'Could not estimate budget';
+                            serverHint.textContent = '';
+                        });
+                } else {
+                    hint.textContent = '';
+                    serverHint.textContent = '';
+                // Server-based estimate using city modifiers
+                const tags = Array.from(document.querySelectorAll('#dest-hidden input[name="destinations[]"]')).map(i=>i.value).join(',');
+                if (d > 0 && tags) {
+                    try {
+                        const res = await fetch(`/api/budget/estimate?days=${d}&destinations=${encodeURIComponent(tags)}`);
+                        const data = await res.json();
+                        const el = document.getElementById('budget-server');
+                        if (data.ok) {
+                            el.textContent = `Smart estimate: ₹${(data.estimate_inr||0).toLocaleString('en-IN')} (based on destinations)`;
+                        } else { el.textContent = ''; }
+                    } catch { /* ignore */ }
+                } else {
+                    const el = document.getElementById('budget-server');
+                    if (el) el.textContent = '';
+                }
+            };
+            sd.addEventListener('change', recalc);
+            ed.addEventListener('change', recalc);
+
+            // Initialize suggestion functionality
+            initializeSuggestionButtons();
+        });
+
+        // Function to show toast notifications
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium shadow-lg transform transition-all duration-300 translate-x-full ${
+                type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Slide in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 10);
+            
+            // Slide out and remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize suggestion buttons functionality
+        function initializeSuggestionButtons() {
+            // Add to Trip buttons
+            document.querySelectorAll('.interactive-card').forEach(card => {
+                const addToTripBtn = card.querySelector('.absolute.bottom-4 button');
+                const addToWishlistBtn = card.querySelector('.absolute.top-3.right-3 button');
+                const title = card.querySelector('h3').textContent.trim();
+                const locationElement = card.querySelector('p[class*="text-gray-600"]');
+                const location = locationElement ? locationElement.textContent.replace(/.*\s/, '').trim() : '';
+                const descriptionElement = card.querySelector('p[class*="text-gray-500"]');
+                const description = descriptionElement ? descriptionElement.textContent.trim() : '';
+
+                if (addToTripBtn) {
+                    addToTripBtn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Add loading state
+                        const originalText = addToTripBtn.innerHTML;
+                        addToTripBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
+                        addToTripBtn.disabled = true;
+                        
+                        try {
+                            const response = await fetch('/api/suggestions/add-to-trip', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    name: title,
+                                    location: location,
+                                    description: description
+                                })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.ok) {
+                                showToast(data.message || 'Added to trip successfully!', 'success');
+                                addToTripBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Added';
+                                addToTripBtn.classList.remove('bg-indigo-600/90', 'hover:bg-indigo-700');
+                                addToTripBtn.classList.add('bg-green-600/90', 'cursor-default');
+                                addToTripBtn.disabled = true;
+                            } else {
+                                showToast(data.error || 'Failed to add to trip', 'error');
+                                addToTripBtn.innerHTML = originalText;
+                                addToTripBtn.disabled = false;
+                            }
+                        } catch (error) {
+                            console.error('Error adding to trip:', error);
+                            showToast('Network error occurred', 'error');
+                            addToTripBtn.innerHTML = originalText;
+                            addToTripBtn.disabled = false;
+                        }
+                    });
+                }
+
+                if (addToWishlistBtn) {
+                    let isInWishlist = false;
+                    
+                    addToWishlistBtn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if (isInWishlist) return;
+                        
+                        // Add loading state
+                        const originalIcon = addToWishlistBtn.querySelector('i');
+                        originalIcon.className = 'fas fa-spinner fa-spin';
+                        addToWishlistBtn.disabled = true;
+                        
+                        try {
+                            const response = await fetch('/api/suggestions/add-to-wishlist', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    name: title,
+                                    location: location,
+                                    description: description
+                                })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.ok) {
+                                showToast(data.message || 'Added to wishlist!', 'success');
+                                originalIcon.className = 'fas fa-heart';
+                                addToWishlistBtn.classList.add('text-red-500');
+                                addToWishlistBtn.setAttribute('data-tooltip', 'In wishlist');
+                                isInWishlist = true;
+                            } else {
+                                showToast(data.error || 'Failed to add to wishlist', 'error');
+                                originalIcon.className = 'fas fa-heart';
+                            }
+                        } catch (error) {
+                            console.error('Error adding to wishlist:', error);
+                            showToast('Network error occurred', 'error');
+                            originalIcon.className = 'fas fa-heart';
+                        }
+                        
+                        addToWishlistBtn.disabled = false;
+                    });
+
+                    // Add hover effect for wishlist button
+                    addToWishlistBtn.addEventListener('mouseenter', () => {
+                        if (!isInWishlist) {
+                            addToWishlistBtn.classList.add('text-red-300');
+                        }
+                    });
+                    
+                    addToWishlistBtn.addEventListener('mouseleave', () => {
+                        if (!isInWishlist) {
+                            addToWishlistBtn.classList.remove('text-red-300');
+                        }
+                    });
+                }
+            });
+
+            // Add click animation to suggestion cards
+            document.querySelectorAll('.interactive-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Only trigger if not clicking on buttons
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                        return;
+                    }
+                    
+                    // Add subtle click feedback
+                    card.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        card.style.transform = '';
+                    }, 150);
+                });
+            });
+        }
+
+    // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').setAttribute('min', today);
+        document.getElementById('endDate').setAttribute('min', today);
+        
+        // Update end date minimum when start date changes
+        document.getElementById('startDate').addEventListener('change', function() {
+            const startDate = this.value;
+            document.getElementById('endDate').setAttribute('min', startDate);
+        });
+
+        // Taggable multi-select with ripple and basic drag-to-reorder
+        (function(){
+            const container = document.getElementById('destination-select');
+            const input = document.getElementById('dest-input');
+            const hidden = document.getElementById('dest-hidden');
+            let tags = [];
+
+            function render(){
+                // Clear chips except input
+                container.querySelectorAll('.chip').forEach(c=>c.remove());
+                tags.forEach((t, idx)=>{
+                    const chip = document.createElement('span');
+                    chip.className = 'chip inline-flex items-center bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full text-sm select-none ripple-effect';
+                    chip.draggable = true;
+                    chip.dataset.index = idx;
+                    chip.innerHTML = `<span class="mx-1">${t}</span><button type="button" class="ml-1 w-5 h-5 flex items-center justify-center rounded-full hover:bg-indigo-100" aria-label="Remove">×</button>`;
+                    chip.addEventListener('click', (e)=>{
+                        if(e.target.tagName.toLowerCase()==='button'){ remove(idx); }
+                    });
+                    chip.addEventListener('dragstart', (e)=>{ e.dataTransfer.setData('text/plain', idx); });
+                    chip.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+                    chip.addEventListener('drop', (e)=>{
+                        e.preventDefault();
+                        const from = parseInt(e.dataTransfer.getData('text/plain'),10);
+                        const to = parseInt(chip.dataset.index,10);
+                        if(!isNaN(from) && !isNaN(to) && from!==to){
+                            const moved = tags.splice(from,1)[0];
+                            tags.splice(to,0,moved);
+                            syncHidden();
+                            render();
+                        }
+                    });
+                    container.insertBefore(chip, input);
+                });
+            }
+
+            function syncHidden(){
+                hidden.innerHTML='';
+                tags.forEach(v=>{
+                    const h = document.createElement('input');
+                    h.type='hidden'; h.name='destinations[]'; h.value=v;
+                    hidden.appendChild(h);
+                });
+            }
+
+            function add(value){
+                const v = (value||'').trim();
+                if(!v) return;
+                if(tags.includes(v)) return; // de-dup
+                tags.push(v);
+                input.value='';
+                syncHidden();
+                render();
+                // refresh budget with new tag
+                const evt = new Event('change');
+                document.getElementById('endDate').dispatchEvent(evt);
+            }
+            function remove(idx){
+                tags.splice(idx,1);
+                syncHidden();
+                render();
+                const evt = new Event('change');
+                document.getElementById('endDate').dispatchEvent(evt);
+            }
+
+            input.addEventListener('keydown',(e)=>{
+                if(e.key==='Enter' || e.key===','){
+                    e.preventDefault();
+                    add(input.value.replace(',', ''));
+                } else if(e.key==='Backspace' && input.value===''){
+                    tags.pop();
+                    syncHidden();
+                    render();
+                }
+            });
+            container.addEventListener('click', ()=> input.focus());
+
+            // Quick suggestion buttons
+            document.querySelectorAll('[data-suggest]').forEach(btn=>{
+                btn.addEventListener('click', ()=> add(btn.getAttribute('data-suggest')));
+            });
+        })();
+    </script>
+</body>
+</html>

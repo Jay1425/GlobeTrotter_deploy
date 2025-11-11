@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Itinerary - GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        
+        .city-card {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .city-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea33 0%, #764ba233 100%);
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .city-card:hover::before {
+            opacity: 1;
+        }
+        
+        .view-toggle input:checked + label {
+            background: #667eea;
+            color: white;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .activity-card {
+            transition: all 0.3s ease;
+        }
+        
+        .activity-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'partials/navbar.html' %}
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        {{ trip.title }}
+                        <span class="ml-4 px-3 py-1 text-sm rounded-full 
+                            {% if trip.status == 'completed' %}bg-green-100 text-green-800
+                            {% elif trip.status == 'in_progress' %}bg-blue-100 text-blue-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ trip.status|replace('_', ' ')|title }}
+                        </span>
+                    </h1>
+                    <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-1.5 text-gray-400"></i>
+                            {{ trip.start_date.strftime('%b %d') }} - {{ trip.end_date.strftime('%b %d, %Y') }}
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-clock mr-1.5 text-gray-400"></i>
+                            {{ (trip.end_date - trip.start_date).days + 1 }} Days
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-rupee-sign mr-1.5 text-gray-400"></i>
+                            ₹{{ "{:,.0f}".format(trip.budget) }} Budget
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- View Toggle -->
+                <div class="mt-4 flex md:mt-0 md:ml-4">
+                    <div class="view-toggle inline-flex rounded-lg shadow-sm">
+                        <input type="radio" id="timeline" name="view" value="timeline" class="hidden" checked>
+                        <label for="timeline" class="px-4 py-2 text-sm font-medium rounded-l-lg border cursor-pointer transition-all">
+                            <i class="fas fa-stream mr-2"></i>Timeline
+                        </label>
+                        
+                        <input type="radio" id="calendar" name="view" value="calendar" class="hidden">
+                        <label for="calendar" class="px-4 py-2 text-sm font-medium rounded-r-lg border cursor-pointer transition-all">
+                            <i class="fas fa-calendar-alt mr-2"></i>Calendar
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Timeline View -->
+        <div id="timelineView" class="fade-in">
+            <div class="relative">
+                <div class="timeline-line"></div>
+                
+                {% for destination in destinations %}
+                <div class="mb-16 relative">
+                    <div class="timeline-dot" style="top: 2rem;"></div>
+                    
+                    <!-- City Card -->
+                    <div class="city-card bg-white rounded-xl shadow-sm overflow-hidden max-w-3xl mx-auto">
+                        <div class="relative">
+                            <!-- City Header with Weather -->
+                            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
+                                <h2 class="text-2xl font-bold mb-2">{{ destination.name }}</h2>
+                                <div class="flex flex-wrap gap-4 text-sm opacity-90">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-map-marker-alt mr-1.5"></i>
+                                        {{ destination.city }}, {{ destination.country }}
+                                    </span>
+                                    {% if destination.date_range %}
+                                    <span class="flex items-center">
+                                        <i class="fas fa-calendar mr-1.5"></i>
+                                        {{ destination.date_range.start.strftime('%b %d') }} - {{ destination.date_range.end.strftime('%b %d') }}
+                                        ({{ destination.date_range.duration }} days)
+                                    </span>
+                                    {% endif %}
+                                    {% if destination.budget %}
+                                    <span class="flex items-center">
+                                        <i class="fas fa-rupee-sign mr-1.5"></i>
+                                        ₹{{ "{:,.0f}".format(destination.budget) }} Budget
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                {% if weather and loop.first %}
+                                <div class="absolute top-6 right-6 flex items-center bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                                    <i class="fas fa-{{ 
+                                        'sun' if weather.weather[0].main == 'Clear' 
+                                        else 'cloud' if weather.weather[0].main == 'Clouds' 
+                                        else 'cloud-rain' if weather.weather[0].main == 'Rain' 
+                                        else 'cloud-sun' }} text-2xl mr-3"></i>
+                                    <div>
+                                        <div class="text-2xl font-bold">{{ "%.0f"|format(weather.main.temp) }}°C</div>
+                                        <div class="text-xs opacity-90">{{ weather.weather[0].description|title }}</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Daily Timeline -->
+                            <div class="p-6">
+                                <div class="relative pl-8 space-y-6">
+                                    {% for activity in destination.activities %}
+                                    <div class="activity-card relative">
+                                        <!-- Time Indicator -->
+                                        <div class="absolute -left-8 flex items-center justify-center w-6 h-6 bg-indigo-100 rounded-full">
+                                            <div class="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                                        </div>
+                                        <!-- Activity Content -->
+                                        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 ml-4 hover:border-indigo-200 transition-colors">
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center">
+                                                        <span class="text-sm font-semibold text-indigo-600">{{ activity.time }}</span>
+                                                        <span class="mx-2 text-gray-300">•</span>
+                                                        <span class="text-sm text-gray-500">{{ activity.duration }}</span>
+                                                    </div>
+                                                    <h3 class="font-medium text-gray-900 mt-1">{{ activity.name }}</h3>
+                                                    {% if activity.description %}
+                                                    <p class="text-sm text-gray-500 mt-1">{{ activity.description }}</p>
+                                                    {% endif %}
+                                                    
+                                                    <div class="flex flex-wrap gap-2 mt-3">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                            {% if activity.category == 'Sightseeing' %}bg-blue-100 text-blue-800
+                                                            {% elif activity.category == 'Food' %}bg-green-100 text-green-800
+                                                            {% elif activity.category == 'Adventure' %}bg-orange-100 text-orange-800
+                                                            {% elif activity.category == 'Culture' %}bg-purple-100 text-purple-800
+                                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                            <i class="fas fa-{{ 
+                                                                'monument' if activity.category == 'Sightseeing'
+                                                                else 'utensils' if activity.category == 'Food'
+                                                                else 'hiking' if activity.category == 'Adventure'
+                                                                else 'theater-masks' if activity.category == 'Culture'
+                                                                else 'star' }} mr-1"></i>
+                                                            {{ activity.category }}
+                                                        </span>
+                                                        
+                                                        {% if activity.cost %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <i class="fas fa-rupee-sign mr-1"></i>
+                                                            {{ "{:,.0f}".format(activity.cost) }}
+                                                        </span>
+                                                        {% endif %}
+                                                        
+                                                        {% if activity.status %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                            {% if activity.status == 'completed' %}bg-green-100 text-green-800
+                                                            {% elif activity.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                            <i class="fas fa-{{ 
+                                                                'check' if activity.status == 'completed'
+                                                                else 'clock' if activity.status == 'in_progress'
+                                                                else 'calendar' }} mr-1"></i>
+                                                            {{ activity.status|title }}
+                                                        </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div id="calendarView" class="hidden fade-in">
+            <div class="grid grid-cols-7 gap-4">
+                <!-- Calendar Header -->
+                <div class="col-span-7 grid grid-cols-7 gap-4 text-center text-sm font-medium text-gray-500 mb-2">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                
+                <!-- Calendar Days -->
+                {% for week in calendar_days %}
+                {% for day in week %}
+                <div class="aspect-w-1 aspect-h-1">
+                    <div class="w-full h-full p-2 {% if day.date == today %}bg-indigo-50 ring-2 ring-indigo-500{% else %}bg-white{% endif %} rounded-lg shadow-sm">
+                        <div class="text-sm font-medium text-gray-900 mb-1">{{ day.date.day }}</div>
+                        {% if day.activities %}
+                        <div class="space-y-1">
+                            {% for activity in day.activities[:3] %}
+                            <div class="text-xs p-1 rounded {% if activity.category == 'Sightseeing' %}bg-blue-100 text-blue-800
+                                {% elif activity.category == 'Food' %}bg-green-100 text-green-800
+                                {% elif activity.category == 'Adventure' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %} truncate">
+                                {{ activity.name }}
+                            </div>
+                            {% endfor %}
+                            {% if day.activities|length > 3 %}
+                            <div class="text-xs text-gray-500">+{{ day.activities|length - 3 }} more</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // View Toggle
+        const timelineView = document.getElementById('timelineView');
+        const calendarView = document.getElementById('calendarView');
+        
+        document.querySelectorAll('.view-toggle input').forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.value === 'timeline') {
+                    timelineView.classList.remove('hidden');
+                    calendarView.classList.add('hidden');
+                } else {
+                    timelineView.classList.add('hidden');
+                    calendarView.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Scroll Animation
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.city-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            elements.forEach(element => {
+                observer.observe(element);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', animateOnScroll);
+    </script>
+</body>
+</html>

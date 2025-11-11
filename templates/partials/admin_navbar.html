@@ -1,0 +1,197 @@
+<!-- Admin Navigation - Completely separate from user interface -->
+<nav class="admin-nav bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg">
+    <div class="container mx-auto px-6">
+        <div class="flex justify-between items-center h-16">
+            <!-- Admin Logo/Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold">Admin Panel</h1>
+                    <p class="text-xs text-gray-300">GlobeTrotter Management</p>
+                </div>
+            </div>
+
+            <!-- Admin Navigation Links -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="{{ url_for('admin_dashboard') }}" 
+                   class="nav-link px-4 py-2 rounded-lg transition-all duration-200 {% if request.endpoint == 'admin_dashboard' %}bg-orange-600 text-white{% else %}text-gray-300 hover:text-white hover:bg-slate-700{% endif %}">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" 
+                   class="nav-link px-4 py-2 rounded-lg transition-all duration-200 {% if request.endpoint == 'admin_users' %}bg-orange-600 text-white{% else %}text-gray-300 hover:text-white hover:bg-slate-700{% endif %}">
+                    <i class="fas fa-users mr-2"></i>
+                    Users
+                </a>
+                <a href="{{ url_for('admin_trips') }}" 
+                   class="nav-link px-4 py-2 rounded-lg transition-all duration-200 {% if request.endpoint == 'admin_trips' %}bg-orange-600 text-white{% else %}text-gray-300 hover:text-white hover:bg-slate-700{% endif %}">
+                    <i class="fas fa-suitcase mr-2"></i>
+                    Trips
+                </a>
+            </div>
+
+            <!-- Admin User Menu -->
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <button class="relative p-2 text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+
+                <!-- Admin Profile Dropdown -->
+                <div class="relative" id="adminDropdown">
+                    <button class="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-700 transition-colors" onclick="toggleAdminDropdown()">
+                        <div class="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                            {% if current_user and current_user.first_name %}
+                                <span class="text-white text-sm font-semibold">{{ current_user.first_name[0].upper() }}</span>
+                            {% else %}
+                                <i class="fas fa-user text-white text-sm"></i>
+                            {% endif %}
+                        </div>
+                        <div class="hidden md:block text-left">
+                            <p class="text-sm font-medium">
+                                {% if current_user %}{{ current_user.first_name }} {{ current_user.last_name }}{% else %}Admin{% endif %}
+                            </p>
+                            <p class="text-xs text-gray-400">Administrator</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="adminDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                        <div class="py-2">
+                            <!-- Admin Info -->
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {% if current_user %}{{ current_user.email }}{% else %}admin@globetrotter.com{% endif %}
+                                </p>
+                                <p class="text-xs text-orange-600 font-semibold">Administrator</p>
+                            </div>
+
+                            <!-- Admin Actions -->
+                            <a href="{{ url_for('admin_dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-chart-line mr-3 text-gray-400"></i>
+                                Dashboard
+                            </a>
+                            <a href="{{ url_for('admin_users') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-users mr-3 text-gray-400"></i>
+                                Manage Users
+                            </a>
+                            <a href="{{ url_for('admin_trips') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-suitcase mr-3 text-gray-400"></i>
+                                Manage Trips
+                            </a>
+
+                            <hr class="my-2">
+
+                            <!-- Switch to User Panel -->
+                            <a href="{{ url_for('dashboard') }}" class="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors">
+                                <i class="fas fa-user mr-3 text-blue-500"></i>
+                                Switch to User Panel
+                            </a>
+
+                            <hr class="my-2">
+
+                            <!-- Logout -->
+                            <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden p-2 text-gray-300 hover:text-white" onclick="toggleMobileAdminMenu()">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileAdminMenu" class="hidden md:hidden mt-4 pb-4 border-t border-slate-700">
+            <div class="space-y-2 mt-4">
+                <a href="{{ url_for('admin_dashboard') }}" 
+                   class="block px-4 py-2 rounded-lg transition-colors {% if request.endpoint == 'admin_dashboard' %}bg-orange-600 text-white{% else %}text-gray-300 hover:text-white hover:bg-slate-700{% endif %}">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" 
+                   class="block px-4 py-2 rounded-lg transition-colors {% if request.endpoint == 'admin_users' %}bg-orange-600 text-white{% else %}text-gray-300 hover:text-white hover:bg-slate-700{% endif %}">
+                    <i class="fas fa-users mr-2"></i>
+                    Users
+                </a>
+                <a href="{{ url_for('admin_trips') }}" 
+                   class="block px-4 py-2 rounded-lg transition-colors {% if request.endpoint == 'admin_trips' %}bg-orange-600 text-white{% else %}text-gray-300 hover:text-white hover:bg-slate-700{% endif %}">
+                    <i class="fas fa-suitcase mr-2"></i>
+                    Trips
+                </a>
+                <hr class="my-2 border-slate-700">
+                <a href="{{ url_for('dashboard') }}" class="block px-4 py-2 rounded-lg text-blue-400 hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-user mr-2"></i>
+                    Switch to User Panel
+                </a>
+                <a href="{{ url_for('logout') }}" class="block px-4 py-2 rounded-lg text-red-400 hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+function toggleAdminDropdown() {
+    const dropdown = document.getElementById('adminDropdownMenu');
+    dropdown.classList.toggle('hidden');
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdownContainer = document.getElementById('adminDropdown');
+        if (!dropdownContainer.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+}
+
+function toggleMobileAdminMenu() {
+    const menu = document.getElementById('mobileAdminMenu');
+    menu.classList.toggle('hidden');
+}
+
+// Close mobile menu when window is resized to desktop
+window.addEventListener('resize', function() {
+    if (window.innerWidth >= 768) {
+        document.getElementById('mobileAdminMenu').classList.add('hidden');
+    }
+});
+</script>
+
+<style>
+.admin-nav {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.nav-link {
+    position: relative;
+    font-weight: 500;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(to right, #f97316, #dc2626);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::before {
+    width: 100%;
+}
+</style>

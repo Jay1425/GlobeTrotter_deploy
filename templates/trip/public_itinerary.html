@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Itinerary • GlobeTrotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .trip-stats-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .trip-stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .itinerary-day {
+            position: relative;
+        }
+        
+        .itinerary-day::before {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        
+        .itinerary-day::after {
+            content: '';
+            position: absolute;
+            left: calc(-1rem - 4px);
+            top: 1.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4f46e5;
+            border: 2px solid white;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'partials/navbar.html' %}
+
+    <!-- Hero Banner -->
+    <div class="relative overflow-hidden">
+        <div class="gradient-bg h-96">
+            <img src="{{ trip.cover_photo if trip and trip.cover_photo else 'https://source.unsplash.com/1600x900/?travel' }}" 
+                 alt="Trip Cover" 
+                 class="w-full h-full object-cover opacity-50">
+        </div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="text-center text-white">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ trip.title if trip else 'European Adventure' }}</h1>
+                <p class="text-xl opacity-90">{{ trip.dates if trip else 'June 15-30, 2024' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 -mt-20 relative">
+        <!-- Trip Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="trip-stats-card bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Duration</p>
+                        <p class="text-xl font-semibold text-gray-900">15 Days</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="trip-stats-card bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                        <i class="fas fa-map-marker-alt text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Destinations</p>
+                        <p class="text-xl font-semibold text-gray-900">5 Cities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="trip-stats-card bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                        <i class="fas fa-ticket-alt text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Activities</p>
+                        <p class="text-xl font-semibold text-gray-900">12 Planned</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 mb-8 no-print">
+            <button onclick="window.print()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                <i class="fas fa-print mr-2"></i>Print Itinerary
+            </button>
+            <button onclick="copyTrip()" class="px-6 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+                <i class="fas fa-copy mr-2"></i>Copy Trip
+            </button>
+            <button onclick="shareTrip()" class="px-6 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
+                <i class="fas fa-share-alt mr-2"></i>Share
+            </button>
+        </div>
+
+        <!-- Trip Description -->
+        <div class="bg-white rounded-xl shadow-md p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Trip Overview</h2>
+            <p class="text-gray-600 leading-relaxed">
+                {{ trip.description if trip else 'A 15-day adventure through Europe's most iconic cities. Starting in Paris, 
+                we'll explore the City of Light before heading to Amsterdam, Berlin, Prague, and finally Vienna. 
+                This carefully crafted itinerary combines must-see landmarks, local experiences, and plenty of 
+                free time to explore on your own.' }}
+            </p>
+        </div>
+
+        <!-- Itinerary -->
+        <div class="bg-white rounded-xl shadow-md p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Daily Itinerary</h2>
+            
+            <!-- Day 1 -->
+            <div class="itinerary-day pl-8 mb-8">
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Day 1: Paris Arrival</h3>
+                    <p class="text-gray-600">June 15, 2024</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium text-gray-900">Eiffel Tower Visit</h4>
+                                <p class="text-sm text-gray-600">9:00 AM - 12:00 PM</p>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    Skip-the-line access to Paris's most iconic landmark. Includes guided tour and access to the summit.
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-medium text-gray-700">€30</span>
+                                <div class="mt-2">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Booked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium text-gray-900">Seine River Dinner Cruise</h4>
+                                <p class="text-sm text-gray-600">7:00 PM - 10:00 PM</p>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    Evening cruise along the Seine with 3-course dinner and wine. Perfect way to see Paris at night.
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-medium text-gray-700">€89</span>
+                                <div class="mt-2">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">To Book</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add more days... -->
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Share Trip</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trip URL</label>
+                    <div class="flex">
+                        <input type="text" 
+                               value="https://globetrotter.com/trips/european-adventure" 
+                               class="flex-1 border rounded-l-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                               readonly>
+                        <button onclick="copyToClipboard(this)" 
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button class="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600">
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
+                    <button class="p-3 rounded-full bg-blue-400 text-white hover:bg-blue-500">
+                        <i class="fab fa-twitter"></i>
+                    </button>
+                    <button class="p-3 rounded-full bg-green-500 text-white hover:bg-green-600">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button class="p-3 rounded-full bg-blue-600 text-white hover:bg-blue-700">
+                        <i class="fab fa-telegram"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="closeShareModal()" 
+                    class="mt-6 w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function copyTrip() {
+            // Show loading state
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Copying...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied to My Trips';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+                
+                showNotification('Trip copied to your account!');
+            }, 1000);
+        }
+
+        function shareTrip() {
+            document.getElementById('shareModal').classList.remove('hidden');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.add('hidden');
+        }
+
+        function copyToClipboard(button) {
+            const input = button.previousElementSibling;
+            input.select();
+            document.execCommand('copy');
+            
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 2000);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg 
+                                   transform translate-x-full transition-transform duration-300`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(full)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('shareModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeShareModal();
+            }
+        });
+    </script>
+</body>
+</html>
