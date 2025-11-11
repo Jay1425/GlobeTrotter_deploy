@@ -45,13 +45,14 @@ In Render dashboard, go to Environment tab and add:
 - `SECRET_KEY` - Click "Generate" button
 - `FLASK_ENV` - Set to `production`
 - `DATABASE_URL` - Link to your PostgreSQL database
-- `MAIL_USERNAME` - Your Gmail address
-- `MAIL_PASSWORD` - Gmail App Password (not your regular password!)
-- `MAIL_DEFAULT_SENDER` - Same as MAIL_USERNAME
+- `SENDGRID_API_KEY` - Get from SendGrid dashboard (see SENDGRID_SETUP.md)
+- `SENDGRID_FROM_EMAIL` - Your verified SendGrid sender email
 
 **Optional (for Google OAuth):**
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
+
+**📧 Important**: See `SENDGRID_SETUP.md` for complete email setup instructions!
 
 ### 6. Deploy!
 - Click "Create Web Service"
@@ -67,14 +68,17 @@ In Render dashboard, go to Environment tab and add:
 - 1GB database storage limit
 - 100GB bandwidth/month
 
-## Gmail App Password Setup
+## SendGrid Email Setup
 
-**IMPORTANT**: Don't use your regular Gmail password!
+**WHY SENDGRID?** Render.com blocks external SMTP servers (Gmail, Outlook, etc.). SendGrid uses HTTP API which works perfectly on Render.
 
-1. Enable 2-Step Verification on your Google account
-2. Go to https://myaccount.google.com/apppasswords
-3. Create app password for "Mail" → "Other"
-4. Use this 16-character password in `MAIL_PASSWORD`
+**Quick Setup:**
+1. Sign up at https://sendgrid.com (free tier: 100 emails/day)
+2. Create API key with "Mail Send" permissions
+3. Verify sender email address
+4. Add `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL` to Render environment variables
+
+**📖 Full guide**: Read `SENDGRID_SETUP.md` for step-by-step instructions!
 
 ## Need Help?
 
@@ -120,8 +124,9 @@ python app.py
 - Check database is in same region as web service
 
 **Email not working?**
-- Verify Gmail App Password is correct
-- Check 2FA is enabled on Gmail account
+- Check SendGrid API key is valid (starts with `SG.`)
+- Verify sender email in SendGrid dashboard
+- See troubleshooting in SENDGRID_SETUP.md
 
 ---
 

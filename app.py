@@ -4,7 +4,8 @@ from routes.budget_routes import budget_routes
 from routes.cities_routes import cities_routes
 from forms import LoginForm, SignupForm
 from flask_dance.contrib.google import make_google_blueprint, google
-from flask_mail import Mail, Message
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content
 import os
 import json
 import time
@@ -42,29 +43,30 @@ app.config.update(
 	SESSION_COOKIE_SECURE=IS_PRODUCTION,  # Only use secure cookies in production
 	SESSION_COOKIE_HTTPONLY=True,
 	SERVER_NAME=None if IS_PRODUCTION else "localhost:5000",  # Don't set SERVER_NAME in production
-	# Email configuration
-	MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.gmail.com'),
-	MAIL_PORT=int(os.environ.get('MAIL_PORT', 587)),
-	MAIL_USE_TLS=os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true',
-	MAIL_USE_SSL=False,
-	MAIL_USERNAME=os.environ.get('MAIL_USERNAME', 'aivisionaries.teams@gmail.com'),
-	MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', 'rvesfkcwikpqmbmw'),
-	MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER', 'aivisionaries.teams@gmail.com'),
-	MAIL_DEBUG=not IS_PRODUCTION,  # Disable debug in production
-	MAIL_SUPPRESS_SEND=False,  # Allow sending emails
 )
 db.init_app(app)
 
-# Initialize Flask-Mail
-mail = Mail(app)
+# SendGrid Email Configuration
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@yourdomain.com')
+
+if not SENDGRID_API_KEY and IS_PRODUCTION:
+	print("WARNING: SENDGRID_API_KEY not set. Email functionality will not work in production.")
+elif not SENDGRID_API_KEY:
+	print("INFO: SENDGRID_API_KEY not set. Email sending disabled in development.")
 
 def send_otp_email(user, otp_code):
-	"""Send OTP verification email to user"""
+	"""Send OTP verification email to user using SendGrid"""
+	if not SENDGRID_API_KEY:
+		print(f"WARNING: Cannot send email - SENDGRID_API_KEY not configured")
+		return False
+	
 	try:
-		msg = Message(
+		message = Mail(
+			from_email=Email(SENDGRID_FROM_EMAIL, "GlobeTrotter"),
+			to_emails=To(user.email),
 			subject="Email Verification - GlobeTrotter",
-			recipients=[user.email],
-			html=f'''
+			html_content=Content("text/html", f'''
 			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
 				<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 30px;">
 					<h1 style="color: white; margin: 0; font-size: 28px;">Email Verification</h1>
@@ -90,12 +92,15 @@ def send_otp_email(user, otp_code):
 					<p style="color: #718096; font-size: 12px;">If you have any questions, please contact our support team.</p>
 				</div>
 			</div>
-			'''
+			''')
 		)
-		mail.send(msg)
+		
+		sg = SendGridAPIClient(SENDGRID_API_KEY)
+		response = sg.send(message)
+		print(f"SendGrid response status: {response.status_code}")
 		return True
 	except Exception as e:
-		print(f"Failed to send OTP email: {e}")
+		print(f"Failed to send OTP email via SendGrid: {e}")
 		return False
 
 # Add custom Jinja2 filter for JSON parsing
@@ -377,11 +382,15 @@ def forgot_password():
 				# Create reset URL
 				reset_url = url_for('reset_password_page', token=token, _external=True)
 				
-				# Create email message
-				msg = Message(
+				# Create email message using SendGrid
+				if not SENDGRID_API_KEY:
+					raise Exception("SENDGRID_API_KEY not configured")
+				
+				message_sg = Mail(
+					from_email=Email(SENDGRID_FROM_EMAIL, "GlobeTrotter"),
+					to_emails=To(email),
 					subject='Password Reset Request - GlobeTrotter',
-					recipients=[email],
-					html=f'''
+					html_content=Content("text/html", f'''
 					<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
 						<div style="text-align: center; margin-bottom: 30px;">
 							<h1 style="color: #3B82F6; margin: 0;">GlobeTrotter</h1>
@@ -415,11 +424,13 @@ def forgot_password():
 							<p style="word-break: break-all; color: #3B82F6;">{reset_url}</p>
 						</div>
 					</div>
-					'''
+					''')
 				)
 				
-				# Try to send email
-				mail.send(msg)
+				# Try to send email via SendGrid
+				sg = SendGridAPIClient(SENDGRID_API_KEY)
+				response = sg.send(message_sg)
+				print(f"SendGrid password reset email sent. Status: {response.status_code}")
 				
 				message = f"Password reset link sent to {email}. Please check your email and follow the instructions."
 				if request.is_json or is_ajax:
