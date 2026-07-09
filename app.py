@@ -46,6 +46,19 @@ app.config.update(
 )
 db.init_app(app)
 
+
+def ensure_database_tables():
+	"""Create any missing database tables during app startup."""
+	try:
+		with app.app_context():
+			db.create_all()
+			print("✓ Database tables ensured")
+	except Exception as e:
+		print(f"WARNING: Could not ensure database tables on startup: {e}")
+
+
+ensure_database_tables()
+
 # SendGrid Email Configuration
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@yourdomain.com')
@@ -3221,9 +3234,6 @@ def ping():
 	return jsonify({"message": "pong", "timestamp": datetime.utcnow().isoformat()}), 200
 
 if __name__ == "__main__":
-	# Ensure DB tables exist
-	with app.app_context():
-		db.create_all()
 	# For local development. In production, use a WSGI server (gunicorn/uwsgi) instead.
 	app.run(debug=True)
 
