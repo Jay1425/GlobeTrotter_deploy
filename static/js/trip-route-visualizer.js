@@ -31,7 +31,7 @@ class TripRouteVisualizer {
 
     loadGoogleMapsAPI() {
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA&libraries=places&callback=initTripRouteVisualizer`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY || ''}&libraries=places&callback=initTripRouteVisualizer`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
@@ -42,7 +42,7 @@ class TripRouteVisualizer {
     }
 
     async setupMapsIntegration() {
-        this.mapManager = new GlobeTrotterMaps('AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA');
+        this.mapManager = new GlobeTrotterMaps(window.GOOGLE_MAPS_API_KEY || '');
         
         // Add map toggle to itinerary page
         this.addMapToggleButton();
