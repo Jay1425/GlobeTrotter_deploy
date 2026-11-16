@@ -79,9 +79,9 @@ Set these in Render dashboard:
 SECRET_KEY=[configure securely via environment variables]
 FLASK_ENV=production
 DATABASE_URL=<auto-linked from database>
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=[configure securely via environment variables]
-MAIL_DEFAULT_SENDER=your-email@gmail.com
+MAIL_USERNAME=your-sender-email@example.com
+MAIL_PASSWORD=your-google-app-password
+MAIL_DEFAULT_SENDER=your-sender-email@example.com
 ```
 
 ### Optional (for Google OAuth)
