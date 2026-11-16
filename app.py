@@ -31,6 +31,7 @@ if IS_PRODUCTION and not os.environ.get('SECRET_KEY'):
     raise RuntimeError('SECRET_KEY must be configured in production')
 
 app.config.update(
+    Maps_API_KEY=os.environ.get('GOOGLE_MAPS_API_KEY', ''),
 	SECRET_KEY=os.environ.get('SECRET_KEY') or os.urandom(32),
 	SQLALCHEMY_DATABASE_URI=DATABASE_URL or "sqlite:///instance/globetrotter.db",
 	SQLALCHEMY_TRACK_MODIFICATIONS=False,
