@@ -23,7 +23,7 @@ class CitySearchWithMaps {
 
     loadGoogleMapsAPI() {
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA&libraries=places&callback=initCitySearchMaps`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_MAPS_API_KEY || ''}&libraries=places&callback=initCitySearchMaps`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
@@ -35,7 +35,7 @@ class CitySearchWithMaps {
     }
 
     setupMapsIntegration() {
-        this.mapManager = new GlobeTrotterMaps('AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA');
+        this.mapManager = new GlobeTrotterMaps(window.GOOGLE_MAPS_API_KEY || '');
         
         // Initialize map in city search page
         if (document.getElementById('city-search-map')) {
