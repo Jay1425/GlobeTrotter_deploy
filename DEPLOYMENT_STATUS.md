@@ -102,17 +102,17 @@ Set these in Render Dashboard → Environment tab:
 
 ### Required Variables
 ```
-SECRET_KEY=<click Generate button in Render>
+SECRET_KEY=[configure securely via environment variables]
 FLASK_ENV=production
 DATABASE_URL=<link to PostgreSQL database>
-SENDGRID_API_KEY=SG.your-api-key-here
+SENDGRID_API_KEY=[configure securely via environment variables]
 SENDGRID_FROM_EMAIL=your-verified-email@domain.com
 ```
 
 ### Optional Variables (Google OAuth)
 ```
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_CLIENT_SECRET=[configure securely via environment variables]
 ```
 
 ---
