@@ -76,18 +76,18 @@ Set these in Render dashboard:
 
 ### Critical (Required)
 ```
-SECRET_KEY=<auto-generate in Render>
+SECRET_KEY=[configure securely via environment variables]
 FLASK_ENV=production
 DATABASE_URL=<auto-linked from database>
 MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=<gmail-app-password>
+MAIL_PASSWORD=[configure securely via environment variables]
 MAIL_DEFAULT_SENDER=your-email@gmail.com
 ```
 
 ### Optional (for Google OAuth)
 ```
 GOOGLE_CLIENT_ID=<your-client-id>
-GOOGLE_CLIENT_SECRET=<your-client-secret>
+GOOGLE_CLIENT_SECRET=[configure securely via environment variables]
 ```
 
 ## Render.com Free Tier Specs

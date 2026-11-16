@@ -20,13 +20,15 @@ The forgot password feature has been fully implemented with the following compon
 
 ### **Email Configuration Required:**
 
-To enable actual email sending, update these settings in `app.py`:
+To enable actual email sending, configure these environment variables locally or in your deployment platform:
 
-```python
-# Current placeholder configuration (lines 15-21):
-MAIL_USERNAME='aivisionaries.teams@gmail.com',        # Replace with your Gmail
-MAIL_PASSWORD='rvesfkcwikpqmbmw',           # Replace with Gmail app password  
-MAIL_DEFAULT_SENDER='aivisionaries.teams@gmail.comm',  # Replace with your Gmail
+```dotenv
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=your-sender-email@example.com
+MAIL_PASSWORD=your-app-password
+MAIL_DEFAULT_SENDER=your-sender-email@example.com
 ```
 
 ### **Gmail Setup Instructions:**
@@ -77,4 +79,4 @@ The system sends beautifully formatted HTML emails with:
 - Form validation prevents empty or mismatched passwords
 - Database errors are handled gracefully
 
-**The forgot password feature is now fully functional and ready for production use once email credentials are configured!**
+**The forgot password feature is implemented. Verify email delivery and deployment configuration before production use.**

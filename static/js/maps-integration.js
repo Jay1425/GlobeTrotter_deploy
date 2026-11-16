@@ -1,6 +1,6 @@
 /**
  * Google Maps Integration for GlobeTrotter
- * API Key: AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA
+ * API Key: configured at runtime
  */
 
 class GlobeTrotterMaps {

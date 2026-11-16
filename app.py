@@ -27,9 +27,12 @@ if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
 
 # Determine if we're in production
 IS_PRODUCTION = os.environ.get('FLASK_ENV') == 'production'
+if IS_PRODUCTION and not os.environ.get('SECRET_KEY'):
+    raise RuntimeError('SECRET_KEY must be configured in production')
 
 app.config.update(
-	SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-change-me-in-production"),
+    Maps_API_KEY=os.environ.get('GOOGLE_MAPS_API_KEY', ''),
+	SECRET_KEY=os.environ.get('SECRET_KEY') or os.urandom(32),
 	SQLALCHEMY_DATABASE_URI=DATABASE_URL or "sqlite:///instance/globetrotter.db",
 	SQLALCHEMY_TRACK_MODIFICATIONS=False,
 	SQLALCHEMY_ENGINE_OPTIONS={
@@ -2285,7 +2288,7 @@ def get_weather():
             return jsonify({"error": "Latitude and longitude are required"}), 400
             
         # Using OpenWeatherMap API
-        OPENWEATHER_API_KEY = "3422434e8bc000623c0f52a0b92c64ac"
+        OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY', '')
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&appid={OPENWEATHER_API_KEY}&units=metric"
         
         import requests

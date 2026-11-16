@@ -2,7 +2,7 @@
 
 ## Overview
 
-Your GlobeTrotter application has been successfully integrated with Google Maps API using the key: `AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA`
+Your GlobeTrotter application has been successfully integrated with Google Maps API using the key: `[REDACTED_GOOGLE_MAPS_KEY]`
 
 ## Features Implemented
 
