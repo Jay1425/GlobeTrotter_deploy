@@ -40,11 +40,15 @@ MAIL_DEFAULT_SENDER=your-sender-email@example.com
    - Generate password for "Mail"
    - Use this password (not your regular Gmail password)
 
-3. **Update Configuration:**
+3. **Configure email through environment variables** in your local `.env` file or deployment dashboard:
+   ```dotenv
+   MAIL_USERNAME=your-sender-email@example.com
+   MAIL_PASSWORD=your-new-app-password
+   MAIL_DEFAULT_SENDER=your-sender-email@example.com
    ```python
-   MAIL_USERNAME='youremail@gmail.com',
-   MAIL_PASSWORD='your-16-digit-app-password',
-   MAIL_DEFAULT_SENDER='youremail@gmail.com',
+   MAIL_USERNAME=os.environ.get('MAIL_USERNAME', ''),
+   MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', ''),
+   MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER', ''),
    ```
 
 ### **Testing the Feature:**
