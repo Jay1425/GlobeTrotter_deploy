@@ -619,7 +619,8 @@
                     </style>
                     
                     <!-- Add Map and Weather APIs -->
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBD5kYDTg0BYcJbuPGFP5f4JqWWL7mJyzA&libraries=places"></script>
+                    <script>window.GOOGLE_MAPS_API_KEY = {{ config.get('Maps_API_KEY', '')|tojson }};</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config.get('Maps_API_KEY', '') }}&libraries=places"></script>
                     <script>
                         // Trip Type Selection
                         document.querySelectorAll('input[name="tripType"]').forEach(input => {
