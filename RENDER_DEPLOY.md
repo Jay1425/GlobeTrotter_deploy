@@ -80,9 +80,9 @@ DATABASE_URL=<will be auto-filled from database>
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=[configure securely via environment variables]
-MAIL_DEFAULT_SENDER=your-email@gmail.com
+MAIL_USERNAME=your-sender-email@example.com
+MAIL_PASSWORD=your-google-app-password
+MAIL_DEFAULT_SENDER=your-sender-email@example.com
 ```
 
 ### Optional (for Google OAuth)
