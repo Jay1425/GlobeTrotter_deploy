@@ -70,7 +70,7 @@ In the Render dashboard, go to **Environment** tab and add these variables:
 
 ```bash
 # Flask Configuration
-SECRET_KEY=<click "Generate" button for random secure key>
+SECRET_KEY=[configure securely via environment variables]
 FLASK_ENV=production
 
 # Database (auto-populated by Render)
@@ -81,7 +81,7 @@ MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
 MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=<your-gmail-app-password>
+MAIL_PASSWORD=[configure securely via environment variables]
 MAIL_DEFAULT_SENDER=your-email@gmail.com
 ```
 
@@ -89,7 +89,7 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com
 
 ```bash
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_CLIENT_SECRET=[configure securely via environment variables]
 ```
 
 ### Setting Up Gmail App Password
